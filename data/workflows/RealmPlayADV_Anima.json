@@ -1,0 +1,774 @@
+{
+  "8": {
+    "inputs": {
+      "PowerLoraLoaderHeaderWidget": {
+        "type": "PowerLoraLoaderHeaderWidget"
+      },
+      "➕ Add Lora": "",
+      "model": [
+        "63",
+        0
+      ],
+      "clip": [
+        "64",
+        0
+      ]
+    },
+    "class_type": "Power Lora Loader (rgthree)",
+    "_meta": {
+      "title": "Power Lora Loader (rgthree)",
+      "rp_position": [
+        320,
+        40
+      ]
+    }
+  },
+  "9": {
+    "inputs": {
+      "wildcard_text": "",
+      "populated_text": "",
+      "mode": "populate",
+      "seed": 503639546499089,
+      "Select to add Wildcard": "Select the Wildcard to add to the text"
+    },
+    "class_type": "ImpactWildcardProcessor",
+    "_meta": {
+      "title": "POSITIVE",
+      "rp_position": [
+        40,
+        40
+      ]
+    }
+  },
+  "10": {
+    "inputs": {
+      "wildcard_text": "",
+      "populated_text": "",
+      "mode": "populate",
+      "seed": 109965849498560,
+      "Select to add Wildcard": "Select the Wildcard to add to the text"
+    },
+    "class_type": "ImpactWildcardProcessor",
+    "_meta": {
+      "title": "NEGATIVE",
+      "rp_position": [
+        40,
+        230
+      ]
+    }
+  },
+  "11": {
+    "inputs": {
+      "seed": 1067019740373861,
+      "steps": 20,
+      "cfg": 7,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "8",
+        0
+      ],
+      "positive": [
+        "12",
+        0
+      ],
+      "negative": [
+        "13",
+        0
+      ],
+      "latent_image": [
+        "15",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler",
+      "rp_position": [
+        1160,
+        40
+      ]
+    }
+  },
+  "12": {
+    "inputs": {
+      "text": [
+        "40",
+        0
+      ],
+      "clip": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive to KSampler",
+      "rp_position": [
+        880,
+        40
+      ]
+    }
+  },
+  "13": {
+    "inputs": {
+      "text": [
+        "10",
+        0
+      ],
+      "clip": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative to KSampler",
+      "rp_position": [
+        600,
+        40
+      ]
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode",
+      "rp_position": [
+        1440,
+        40
+      ]
+    }
+  },
+  "15": {
+    "inputs": {
+      "width": 512,
+      "height": 768,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "LantentSize",
+      "rp_position": [
+        40,
+        420
+      ]
+    }
+  },
+  "16": {
+    "inputs": {
+      "modelname": [
+        "20",
+        0
+      ],
+      "positive": [
+        "9",
+        0
+      ],
+      "negative": [
+        "10",
+        0
+      ],
+      "width": [
+        "17",
+        0
+      ],
+      "height": [
+        "17",
+        1
+      ],
+      "seed_value": [
+        "55",
+        0
+      ],
+      "steps": [
+        "56",
+        0
+      ],
+      "cfg": [
+        "58",
+        0
+      ],
+      "sampler_name": [
+        "48",
+        0
+      ],
+      "scheduler_name": [
+        "18",
+        0
+      ],
+      "denoise": [
+        "61",
+        0
+      ],
+      "clip_skip": [
+        "62",
+        0
+      ],
+      "additional_hashes": "",
+      "download_civitai_data": false,
+      "easy_remix": false,
+      "custom": ""
+    },
+    "class_type": "Image Saver Metadata",
+    "_meta": {
+      "title": "Image Saver Metadata",
+      "rp_position": [
+        2280,
+        40
+      ]
+    }
+  },
+  "17": {
+    "inputs": {
+      "image": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "GetImageSize",
+      "rp_position": [
+        2000,
+        40
+      ]
+    }
+  },
+  "18": {
+    "inputs": {
+      "value": [
+        "52",
+        0
+      ]
+    },
+    "class_type": "Any to String (Image Saver)",
+    "_meta": {
+      "title": "Any to String (Image Saver)",
+      "rp_position": [
+        320,
+        230
+      ]
+    }
+  },
+  "20": {
+    "inputs": {
+      "value": [
+        "33",
+        0
+      ]
+    },
+    "class_type": "Any to String (Image Saver)",
+    "_meta": {
+      "title": "Any to String (Image Saver)",
+      "rp_position": [
+        320,
+        420
+      ]
+    }
+  },
+  "21": {
+    "inputs": {
+      "filename": "textgen_comfy",
+      "path": "",
+      "extension": "png",
+      "lossless_webp": false,
+      "quality_jpeg_or_webp": 100,
+      "optimize_png": true,
+      "embed_workflow": true,
+      "save_workflow_as_json": false,
+      "counter": 0,
+      "time_format": "%Y-%m-%d-%H%M%S",
+      "show_preview": true,
+      "images": [
+        "45",
+        0
+      ],
+      "metadata": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "Image Saver Simple",
+    "_meta": {
+      "title": "Image Saver Simple",
+      "rp_position": [
+        2280,
+        230
+      ]
+    }
+  },
+  "23": {
+    "inputs": {
+      "images": [
+        "45",
+        1
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Cropped (refined)",
+      "rp_position": [
+        2280,
+        420
+      ]
+    }
+  },
+  "24": {
+    "inputs": {
+      "images": [
+        "45",
+        2
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "PreviewImage",
+      "rp_position": [
+        2280,
+        610
+      ]
+    }
+  },
+  "25": {
+    "inputs": {
+      "images": [
+        "26",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Mask",
+      "rp_position": [
+        2280,
+        800
+      ]
+    }
+  },
+  "26": {
+    "inputs": {
+      "mask": [
+        "45",
+        3
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "MaskToImage",
+      "rp_position": [
+        2280,
+        990
+      ]
+    }
+  },
+  "27": {
+    "inputs": {
+      "model_name": "sam_vit_b_01ec64.pth",
+      "device_mode": "AUTO"
+    },
+    "class_type": "SAMLoader",
+    "_meta": {
+      "title": "SAMLoader",
+      "rp_position": [
+        40,
+        610
+      ]
+    }
+  },
+  "28": {
+    "inputs": {
+      "model_name": "bbox/face_yolov8m.pt"
+    },
+    "class_type": "UltralyticsDetectorProvider",
+    "_meta": {
+      "title": "UltralyticsDetectorProvider",
+      "rp_position": [
+        40,
+        800
+      ]
+    }
+  },
+  "29": {
+    "inputs": {
+      "text": "worst quality, low quality, low detailed, lowres, blur",
+      "clip": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative Record",
+      "rp_position": [
+        600,
+        230
+      ]
+    }
+  },
+  "30": {
+    "inputs": {
+      "resize_type": "scale by multiplier",
+      "resize_type.scale": 2.5,
+      "quality": "ULTRA",
+      "images": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "RTXVideoSuperResolution",
+    "_meta": {
+      "title": "RTXVideoSuperResolution",
+      "rp_position": [
+        1720,
+        40
+      ]
+    }
+  },
+  "33": {
+    "inputs": {
+      "wildcard_text": "confused_desire",
+      "populated_text": "confused_desire",
+      "mode": "populate",
+      "seed": 927752796431240,
+      "Select to add Wildcard": "Select the Wildcard to add to the text"
+    },
+    "class_type": "ImpactWildcardProcessor",
+    "_meta": {
+      "title": "EMOTION",
+      "rp_position": [
+        40,
+        990
+      ]
+    }
+  },
+  "34": {
+    "inputs": {
+      "string_a": [
+        "9",
+        0
+      ],
+      "string_b": [
+        "33",
+        0
+      ],
+      "delimiter": ""
+    },
+    "class_type": "StringConcatenate",
+    "_meta": {
+      "title": "POSITIVE+EMOTION",
+      "rp_position": [
+        320,
+        610
+      ]
+    }
+  },
+  "36": {
+    "inputs": {
+      "string_a": [
+        "33",
+        0
+      ],
+      "string_b": "Executional extreme detailed face, very high detailed facial features, detailed irises, detailed pupils",
+      "delimiter": ""
+    },
+    "class_type": "StringConcatenate",
+    "_meta": {
+      "title": "Facial Pos",
+      "rp_position": [
+        320,
+        800
+      ]
+    }
+  },
+  "37": {
+    "inputs": {
+      "text": [
+        "36",
+        0
+      ],
+      "clip": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive Record",
+      "rp_position": [
+        600,
+        420
+      ]
+    }
+  },
+  "39": {
+    "inputs": {
+      "wildcard_text": "",
+      "populated_text": "",
+      "mode": "populate",
+      "seed": 527159231025563,
+      "Select to add Wildcard": "Select the Wildcard to add to the text"
+    },
+    "class_type": "ImpactWildcardProcessor",
+    "_meta": {
+      "title": "SUFFIX",
+      "rp_position": [
+        40,
+        1180
+      ]
+    }
+  },
+  "40": {
+    "inputs": {
+      "string_a": [
+        "34",
+        0
+      ],
+      "string_b": [
+        "39",
+        0
+      ],
+      "delimiter": ""
+    },
+    "class_type": "StringConcatenate",
+    "_meta": {
+      "title": "POSITIVE+EMOTION+SUFFIX",
+      "rp_position": [
+        600,
+        610
+      ]
+    }
+  },
+  "45": {
+    "inputs": {
+      "guide_size": 384,
+      "guide_size_for": true,
+      "max_size": 1024,
+      "seed": 520882496911463,
+      "steps": 24,
+      "cfg": 8,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "simple",
+      "denoise": 0.33,
+      "feather": 12,
+      "noise_mask": true,
+      "force_inpaint": true,
+      "bbox_threshold": 0.8,
+      "bbox_dilation": 12,
+      "bbox_crop_factor": 1.2,
+      "sam_detection_hint": "center-1",
+      "sam_dilation": 15,
+      "sam_threshold": 0.8,
+      "sam_bbox_expansion": 0,
+      "sam_mask_hint_threshold": 0.7,
+      "sam_mask_hint_use_negative": "False",
+      "drop_size": 10,
+      "wildcard": "",
+      "cycle": 1,
+      "inpaint_model": false,
+      "noise_mask_feather": 18,
+      "tiled_encode": false,
+      "tiled_decode": false,
+      "image": [
+        "30",
+        0
+      ],
+      "model": [
+        "8",
+        0
+      ],
+      "clip": [
+        "8",
+        1
+      ],
+      "vae": [
+        "65",
+        0
+      ],
+      "positive": [
+        "37",
+        0
+      ],
+      "negative": [
+        "29",
+        0
+      ],
+      "bbox_detector": [
+        "28",
+        0
+      ],
+      "sam_model_opt": [
+        "27",
+        0
+      ]
+    },
+    "class_type": "FaceDetailer",
+    "_meta": {
+      "title": "FaceDetailer",
+      "rp_position": [
+        2000,
+        230
+      ]
+    }
+  },
+  "48": {
+    "inputs": {
+      "value": [
+        "54",
+        0
+      ]
+    },
+    "class_type": "Any to String (Image Saver)",
+    "_meta": {
+      "title": "Any to String (Image Saver)",
+      "rp_position": [
+        320,
+        990
+      ]
+    }
+  },
+  "52": {
+    "inputs": {
+      "scheduler": "normal"
+    },
+    "class_type": "Scheduler Selector (inspire) (Image Saver)",
+    "_meta": {
+      "title": "Scheduler Select",
+      "rp_position": [
+        40,
+        1370
+      ]
+    }
+  },
+  "54": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "Sampler Selector (Image Saver)",
+    "_meta": {
+      "title": "Sampler Select",
+      "rp_position": [
+        40,
+        1560
+      ]
+    }
+  },
+  "55": {
+    "inputs": {
+      "seed": 21569439478198
+    },
+    "class_type": "Seed (rgthree)",
+    "_meta": {
+      "title": "Seed (rgthree)",
+      "rp_position": [
+        40,
+        1750
+      ]
+    }
+  },
+  "56": {
+    "inputs": {
+      "value": -1100819908150182
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "steps",
+      "rp_position": [
+        40,
+        1940
+      ]
+    }
+  },
+  "58": {
+    "inputs": {
+      "value": 24
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "cfg",
+      "rp_position": [
+        40,
+        2130
+      ]
+    }
+  },
+  "61": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "denoise",
+      "rp_position": [
+        40,
+        2320
+      ]
+    }
+  },
+  "62": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "clip_skip",
+      "rp_position": [
+        40,
+        2510
+      ]
+    }
+  },
+  "63": {
+    "inputs": {
+      "unet_name": "miaomiaoRealskin_anima13.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model",
+      "rp_position": [
+        40,
+        2700
+      ]
+    }
+  },
+  "64": {
+    "inputs": {
+      "clip_name": "miaomiaoRealskin_anima13_txt.safetensors",
+      "type": "stable_diffusion",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP",
+      "rp_position": [
+        40,
+        2890
+      ]
+    }
+  },
+  "65": {
+    "inputs": {
+      "vae_name": "qwenImageVAE.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE",
+      "rp_position": [
+        40,
+        3080
+      ]
+    }
+  }
+}

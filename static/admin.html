@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RealmPlay Admin - จัดการ ID และรหัสผ่าน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f17;
+      --card-bg: #161922;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --success: #10b981;
+      --success-hover: #059669;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --badge-admin: #8b5cf6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0d0f17 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      font-size: 28px;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-pill {
+      font-size: 11px;
+      background: rgba(139, 92, 246, 0.2);
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, transform 0.05s;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e5e7eb;
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .btn-success {
+      background: var(--success);
+    }
+
+    .btn-success:hover {
+      background: var(--success-hover);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .form-input {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease;
+      width: 100%;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+    }
+
+    /* Table */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .user-avatar-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #2a2e3d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .role-badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .role-admin {
+      background: rgba(139, 92, 246, 0.2);
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+    }
+
+    .role-user {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+
+    /* Modal for Password Reset */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Login Overlay for Unauthenticated Users */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 15, 23, 0.95);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 16px;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 380px;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .notice {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .notice.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .notice.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #86efac;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ADMIN HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🛡️</div>
+      <div>
+        <div class="brand-title">RealmPlay Admin <span class="admin-pill">Root Access</span></div>
+        <div style="font-size: 12px; color: var(--text-muted);">เฉพาะผู้ดูแลระบบ (Zarch) เท่านั้น</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span id="current-admin-display" style="font-size: 12px; color: #c4b5fd; font-weight: 600;">Admin: Loading...</span>
+      <a href="/" class="btn btn-secondary btn-sm">💬 ไปยัง RealmPlay</a>
+      <button class="btn btn-danger btn-sm" onclick="logoutAdmin()">🚪 ออกจากระบบ</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="container" id="admin-main" style="display: none;">
+
+    <!-- TOP ALERT / NOTIFICATION -->
+    <div id="status-notice" class="notice"></div>
+
+    <!-- SECTION 1: CREATE NEW USER -->
+    <div class="card">
+      <div class="card-title">
+        <span>➕ สร้างบัญชีผู้ใช้ใหม่ (Create Account)</span>
+      </div>
+      <form id="create-user-form" onsubmit="handleCreateUser(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="create-username">Username (ID):</label>
+            <input type="text" id="create-username" class="form-input" placeholder="เช่น JohnDoe" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="create-displayname">Display Name (ชื่อแสดง):</label>
+            <input type="text" id="create-displayname" class="form-input" placeholder="เช่น John" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="create-password">Password (รหัสผ่าน):</label>
+            <input type="text" id="create-password" class="form-input" placeholder="อย่างน้อย 4 ตัวอักษร" required autocomplete="off">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+          <button type="submit" class="btn btn-success">✨ เพิ่มผู้ใช้ใหม่</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- SECTION 2: USERS LIST & MANAGEMENT -->
+    <div class="card">
+      <div class="card-title" style="justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>👥 บัญชีผู้ใช้ทั้งหมดในระบบ</span>
+          <span id="user-count-badge" style="font-size: 12px; color: var(--text-muted); background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 999px;">0 accounts</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="loadUsers()">🔄 รีเฟรชรายชื่อ</button>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ผู้ใช้งาน</th>
+              <th>ชื่อที่แสดง</th>
+              <th>สิทธิ์</th>
+              <th>วันที่สร้าง</th>
+              <th style="text-align: right;">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body">
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">กำลังโหลดรายชื่อบัญชี...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: RESET PASSWORD -->
+  <div id="reset-password-modal" class="modal-backdrop" onclick="if(event.target===this)closeResetModal()">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom: 8px;">🔑 ตั้งรหัสผ่านใหม่</div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">
+        กำหนดรหัสผ่านใหม่สำหรับผู้ใช้: <strong id="reset-target-user" style="color: #fff;"></strong>
+      </p>
+      <form onsubmit="handleResetPassword(event)">
+        <input type="hidden" id="reset-username-input">
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label for="reset-new-password">รหัสผ่านใหม่ (New Password):</label>
+          <input type="text" id="reset-new-password" class="form-input" placeholder="อย่างน้อย 4 ตัวอักษร" required autocomplete="off">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button type="button" class="btn btn-secondary" onclick="closeResetModal()">ยกเลิก</button>
+          <button type="submit" class="btn">💾 บันทึกรหัสผ่าน</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LOGIN OVERLAY IF NOT LOGGED IN AS ADMIN -->
+  <div id="login-overlay">
+    <div class="login-card">
+      <div style="font-size: 36px; margin-bottom: 8px;">🛡️</div>
+      <h2 style="font-size: 18px; margin-bottom: 4px; color: #fff;">RealmPlay Admin Login</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 18px;">
+        ต้องใช้บัญชีผู้ดูแลระบบ (Zarch) เพื่อเข้าสู่หน้านี้
+      </p>
+
+      <div id="login-error" class="notice error" style="margin-bottom: 14px;"></div>
+
+      <form onsubmit="handleAdminLogin(event)" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+        <div class="form-group">
+          <label for="admin-login-user">Username:</label>
+          <input type="text" id="admin-login-user" class="form-input" value="Zarch" required>
+        </div>
+        <div class="form-group">
+          <label for="admin-login-pass">Password:</label>
+          <input type="password" id="admin-login-pass" class="form-input" placeholder="••••••••" required autofocus>
+        </div>
+        <button type="submit" class="btn" style="width: 100%; padding: 11px; justify-content: center; margin-top: 6px;">เข้าสู่ระบบ Admin</button>
+        <a href="/" class="btn btn-secondary" style="width: 100%; padding: 9px; justify-content: center; text-decoration: none;">กลับหน้าหลัก RealmPlay</a>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let token = sessionStorage.getItem("realmplay_token");
+    let currentAdmin = null;
+
+    function showNotice(msg, isError = false) {
+      const box = document.getElementById("status-notice");
+      if (!box) return;
+      box.textContent = msg;
+      box.className = `notice ${isError ? 'error' : 'success'}`;
+      box.style.display = "block";
+      setTimeout(() => { box.style.display = "none"; }, 5000);
+    }
+
+    async function initAdmin() {
+      if (!token) {
+        showLoginOverlay();
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/auth/me", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Invalid session");
+        const data = await res.json();
+
+        if (!data.is_admin) {
+          showLoginOverlay("บัญชีของคุณไม่มีสิทธิ์ผู้ดูแลระบบ (Admin Access Denied)");
+          return;
+        }
+
+        currentAdmin = data.username;
+        document.getElementById("current-admin-display").textContent = `Admin: ${currentAdmin}`;
+        document.getElementById("login-overlay").style.display = "none";
+        document.getElementById("admin-main").style.display = "flex";
+
+        await loadUsers();
+      } catch (err) {
+        showLoginOverlay();
+      }
+    }
+
+    function showLoginOverlay(errMsg = "") {
+      document.getElementById("admin-main").style.display = "none";
+      document.getElementById("login-overlay").style.display = "flex";
+      const errBox = document.getElementById("login-error");
+      if (errMsg) {
+        errBox.textContent = errMsg;
+        errBox.style.display = "block";
+      } else {
+        errBox.style.display = "none";
+      }
+    }
+
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById("admin-login-user").value.trim();
+      const p = document.getElementById("admin-login-pass").value;
+      const errBox = document.getElementById("login-error");
+
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "เข้าสู่ระบบไม่สำเร็จ");
+
+        sessionStorage.setItem("realmplay_token", data.token);
+        sessionStorage.setItem("realmplay_user", data.username);
+        token = data.token;
+        initAdmin();
+      } catch (err) {
+        errBox.textContent = err.message;
+        errBox.style.display = "block";
+      }
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem("realmplay_token");
+      sessionStorage.removeItem("realmplay_user");
+      window.location.href = "/";
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById("users-table-body");
+      try {
+        const res = await fetch("/api/admin/users", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "โหลดรายชื่อไม่สำเร็จ");
+
+        const users = data.users || [];
+        document.getElementById("user-count-badge").textContent = `${users.length} accounts`;
+
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">ไม่พบบัญชีผู้ใช้</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = "";
+        users.forEach(u => {
+          const tr = document.createElement("tr");
+
+          const isAdmin = Boolean(u.is_admin);
+          const isZarch = u.username.toLowerCase() === "zarch";
+          const createdText = u.created_at ? new Date(u.created_at).toLocaleDateString('th-TH') : "-";
+          const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(u.username)}`;
+
+          tr.innerHTML = `
+            <td>
+              <div class="user-avatar-tag">
+                <img class="avatar-circle" src="${avatarUrl}" alt="Avatar">
+                <strong style="color: #fff; font-size: 14px;">${escapeHtml(u.username)}</strong>
+              </div>
+            </td>
+            <td style="color: #d1d5db;">${escapeHtml(u.display_name || u.username)}</td>
+            <td>
+              <span class="role-badge ${isAdmin ? 'role-admin' : 'role-user'}">
+                ${isAdmin ? '👑 Admin' : 'User'}
+              </span>
+            </td>
+            <td style="color: var(--text-muted); font-size: 12px;">${createdText}</td>
+            <td style="text-align: right;">
+              <div style="display: inline-flex; gap: 6px;">
+                <button class="btn btn-secondary btn-sm" onclick="openResetModal('${escapeHtml(u.username)}')">🔑 เปลี่ยนรหัส</button>
+                ${!isZarch ? `<button class="btn btn-danger btn-sm" onclick="confirmDeleteUser('${escapeHtml(u.username)}')">🗑️ ลบ ID</button>` : ''}
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger); padding: 20px;">${err.message}</td></tr>`;
+      }
+    }
+
+    async function handleCreateUser(e) {
+      e.preventDefault();
+      const uInput = document.getElementById("create-username");
+      const dInput = document.getElementById("create-displayname");
+      const pInput = document.getElementById("create-password");
+
+      const username = uInput.value.trim();
+      const display_name = dInput.value.trim();
+      const password = pInput.value;
+
+      try {
+        const res = await fetch("/api/admin/create-user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ username, password, display_name: display_name || username })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "สร้างบัญชีไม่สำเร็จ");
+
+        showNotice(`✓ สร้างบัญชีผู้ใช้ "${username}" เรียบร้อยแล้ว!`);
+        uInput.value = "";
+        dInput.value = "";
+        pInput.value = "";
+        await loadUsers();
+      } catch (err) {
+        showNotice(err.message, true);
+      }
+    }
+
+    function openResetModal(uname) {
+      document.getElementById("reset-target-user").textContent = uname;
+      document.getElementById("reset-username-input").value = uname;
+      document.getElementById("reset-new-password").value = "";
+      document.getElementById("reset-password-modal").style.display = "flex";
+      setTimeout(() => document.getElementById("reset-new-password").focus(), 50);
+    }
+
+    function closeResetModal() {
+      document.getElementById("reset-password-modal").style.display = "none";
+    }
+
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      const username = document.getElementById("reset-username-input").value;
+      const new_password = document.getElementById("reset-new-password").value;
+
+      try {
+        const res = await fetch("/api/admin/reset-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ username, new_password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "รีเซ็ตรหัสผ่านไม่สำเร็จ");
+
+        closeResetModal();
+        showNotice(`✓ เปลี่ยนรหัสผ่านของ "${username}" สำเร็จเรียบร้อย!`);
+      } catch (err) {
+        alert("ข้อผิดพลาด: " + err.message);
+      }
+    }
+
+    async function confirmDeleteUser(uname) {
+      if (!confirm(`⚠️ ยืนยันการลบบัญชี "${uname}" ออกจากระบบหรือไม่?\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/admin/delete-user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ username: uname })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "ลบบัญชีไม่สำเร็จ");
+
+        showNotice(`✓ ลบบัญชีผู้ใช้ "${uname}" เรียบร้อยแล้ว`);
+        await loadUsers();
+      } catch (err) {
+        showNotice(err.message, true);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    window.onload = initAdmin;
+  </script>
+</body>
+</html>
