@@ -73,5 +73,20 @@ Open your browser and go to `http://localhost:8000` to start chatting!
 
 ---
 
+## 🙏 Acknowledgements & Credits
+
+RealmPlay Standalone is built possible thanks to the amazing open-source AI community and projects:
+
+- **[llama.cpp](https://github.com/ggerganov/llama.cpp)** (by Georgi Gerganov & contributors) — High-performance LLM inference engine powering local roleplay.
+- **[Qwen Team (Alibaba Cloud)](https://github.com/QwenLM/Qwen)** — Creators of the exceptional Qwen family of multilingual and multimodal models.
+- **[HauhauCS](https://huggingface.co/HauhauCS)** — Creator of the uncensored and aggressive finetunes for Qwen3.5 that enable unrestrained creative roleplay.
+- **[ComfyUI](https://github.com/comfyanonymous/ComfyUI)** (by comfyanonymous) — Modular and extensible diffusion GUI used for visual scene generation and sprites.
+- **[Edge-TTS](https://github.com/rany2/edge-tts)** (by rany2) — Free, high-quality neural text-to-speech engine.
+- **[Retrieval-based Voice Conversion (RVC)](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)** — Cutting-edge voice timbre and pitch cloning architecture.
+- **[FastAPI](https://github.com/fastapi/fastapi)** & **[Uvicorn](https://github.com/encode/uvicorn)** — Modern, fast asynchronous web server framework.
+- **[Character Card V2 Spec](https://github.com/malfoys/character-card-spec-v2)** — Open standard for portable AI character card interchange.
+
+---
+
 ## 📄 License & Terms of Use
 Licensed under the **PolyForm Noncommercial License 1.0.0** (Free for personal use, no commercial use). See [LICENSE](LICENSE) for details.
