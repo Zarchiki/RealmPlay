@@ -140,9 +140,11 @@ async def generate_edge_tts(text: str, voice: str = "th-TH-PremwadeeNeural", rat
 
 def find_rvc_python() -> str:
     """Finds python executable that contains torch and rvc_python dependencies."""
+    app_dir = os.path.dirname(os.path.abspath(__file__))
     candidates = [
-        r"K:\text-generation-webui\installer_files\env\python.exe",
-        r"K:\Aurelia\runtime\python.exe",
+        os.path.join(app_dir, "runtime", "python.exe"),
+        os.path.join(app_dir, "venv", "Scripts", "python.exe"),
+        os.path.join(app_dir, ".venv", "Scripts", "python.exe"),
         os.path.join(os.path.dirname(sys.executable), "python.exe"),
         sys.executable
     ]
@@ -152,7 +154,7 @@ def find_rvc_python() -> str:
     return sys.executable
 
 def resolve_rvc_model_path(model_name_or_path: str) -> Optional[str]:
-    """Resolves RVC model by checking exact path, RealmPlay models/voice, or fallback directories."""
+    """Resolves RVC model by checking exact path or RealmPlay models/voice directory."""
     if not model_name_or_path:
         return None
     if os.path.isfile(model_name_or_path):
@@ -161,7 +163,7 @@ def resolve_rvc_model_path(model_name_or_path: str) -> Optional[str]:
     app_dir = os.path.dirname(os.path.abspath(__file__))
     candidates = [
         os.path.join(app_dir, "models", "voice"),
-        r"K:\Aurelia\model_dir\voice"
+        os.path.join(app_dir, "model_dir", "voice")
     ]
     target_name = os.path.basename(model_name_or_path)
     for voice_dir in candidates:
@@ -188,14 +190,9 @@ async def run_rvc_pitch_shift(
     ensure_audio_dir()
     app_dir = os.path.dirname(os.path.abspath(__file__))
     local_worker = os.path.join(app_dir, "rvc_worker.py")
-    if os.path.exists(local_worker):
-        worker_script = local_worker
-    else:
-        aurelia_worker = r"K:\Aurelia\rvc_worker.py"
-        if os.path.exists(aurelia_worker):
-            worker_script = aurelia_worker
-        else:
-            raise FileNotFoundError("RVC worker script (rvc_worker.py) not found in RealmPlay")
+    if not os.path.exists(local_worker):
+        raise FileNotFoundError("RVC worker script (rvc_worker.py) not found in RealmPlay")
+    worker_script = local_worker
 
     worker_dir = os.path.dirname(os.path.abspath(worker_script))
     python_exe = find_rvc_python()

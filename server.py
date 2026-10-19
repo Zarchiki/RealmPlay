@@ -4523,8 +4523,8 @@ def list_available_models(user: str = Depends(get_current_user)):
     ]
 
     extra = cfg.get("extra_model_paths", {})
-    text_dir = extra.get("aurelia_text_models", r"K:\Aurelia\model_dir\text")
-    voice_dir = extra.get("aurelia_voice_models", r"K:\Aurelia\model_dir\voice")
+    text_dir = extra.get("text_models") or extra.get("aurelia_text_models")
+    voice_dir = extra.get("voice_models") or extra.get("aurelia_voice_models")
 
     text_models = []
     seen_text = set()
@@ -4538,11 +4538,11 @@ def list_available_models(user: str = Depends(get_current_user)):
                     text_models.append({"name": f, "path": os.path.join(d, f), "source": "RealmPlay/models"})
 
     # 2. Scan fallback / extra text paths
-    if os.path.isdir(text_dir):
+    if text_dir and os.path.isdir(text_dir):
         for f in os.listdir(text_dir):
             if (f.endswith(".gguf") or f.endswith(".bin") or f.endswith(".safetensors")) and f not in seen_text:
                 seen_text.add(f)
-                text_models.append({"name": f, "path": os.path.join(text_dir, f), "source": "Aurelia/model_dir/text"})
+                text_models.append({"name": f, "path": os.path.join(text_dir, f), "source": "Extra/models/text"})
 
     voice_models = []
     seen_voice = set()
@@ -4570,16 +4570,16 @@ def list_available_models(user: str = Depends(get_current_user)):
                             pass
 
     # 2. Scan fallback / extra voice paths
-    if os.path.isdir(voice_dir):
+    if voice_dir and os.path.isdir(voice_dir):
         for root, _, files in os.walk(voice_dir):
             for f in files:
                 full_p = os.path.join(root, f)
                 if (f.endswith(".pth") or f.endswith(".onnx")) and f not in seen_voice:
                     seen_voice.add(f)
-                    voice_models.append({"name": f, "path": full_p, "source": "Aurelia/model_dir/voice"})
+                    voice_models.append({"name": f, "path": full_p, "source": "Extra/models/voice"})
                 elif f.endswith(".index") and f not in seen_index:
                     seen_index.add(f)
-                    index_files.append({"name": f, "path": full_p, "source": "Aurelia/model_dir/voice"})
+                    index_files.append({"name": f, "path": full_p, "source": "Extra/models/voice"})
                 elif f.endswith(".json") and f not in voice_params:
                     try:
                         with open(full_p, "r", encoding="utf-8-sig") as jf:

@@ -19,7 +19,7 @@ ORIGIN = f"http://127.0.0.1:{DEFAULT_ENGINE_PORT}"
 
 
 class TextEngine:
-    def __init__(self, root_dir: str = None, fallback_dir: str = r"K:\Aurelia"):
+    def __init__(self, root_dir: str = None, fallback_dir: str = None):
         self.root = Path(root_dir or os.path.dirname(os.path.abspath(__file__))).resolve()
         self.fallback_root = Path(fallback_dir).resolve() if fallback_dir and os.path.exists(fallback_dir) else None
         self.process: Optional[subprocess.Popen] = None
@@ -38,9 +38,10 @@ class TextEngine:
         atexit.register(self.stop)
 
     def get_server_exe(self) -> Optional[Path]:
-        """Locates llama-server.exe in RealmPlay runtime (primary) or external fallback."""
+        """Locates llama-server.exe in RealmPlay runtime or root folder."""
         candidates = [
             self.root / "runtime" / "llama" / "llama-server.exe",
+            self.root / "runtime" / "llama-server.exe",
             self.root / "llama-server.exe",
         ]
         if self.fallback_root:
@@ -64,8 +65,9 @@ class TextEngine:
                 with open(cfg_path, "r", encoding="utf-8") as f:
                     cfg = json.load(f)
                     extra = cfg.get("extra_model_paths", {})
-                    if "aurelia_text_models" in extra and os.path.isdir(extra["aurelia_text_models"]):
-                        dirs.append(Path(extra["aurelia_text_models"]).resolve())
+                    for k in ("text_models", "aurelia_text_models"):
+                        if k in extra and os.path.isdir(extra[k]):
+                            dirs.append(Path(extra[k]).resolve())
         except Exception as e:
             log.warning(f"Failed parsing extra_model_paths: {e}")
 
@@ -85,6 +87,19 @@ class TextEngine:
             self.root / "models" / "vision",
             self.root / "models",
         ]
+        # Check config.json extra paths if present
+        try:
+            cfg_path = self.root / "config.json"
+            if cfg_path.is_file():
+                with open(cfg_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                    extra = cfg.get("extra_model_paths", {})
+                    for k in ("vision_models", "aurelia_vision_models"):
+                        if k in extra and os.path.isdir(extra[k]):
+                            dirs.append(Path(extra[k]).resolve())
+        except Exception as e:
+            log.warning(f"Failed parsing extra_model_paths for vision: {e}")
+
         if self.fallback_root:
             dirs.append((self.fallback_root / "model_dir" / "vision").resolve())
 
@@ -168,7 +183,7 @@ class TextEngine:
     def build_command(self, model_path: Path, mmproj_path: Optional[Path] = None, context: int = 8192, gpu_layers: int = 99, threads: int = 8, batch_size: int = 512, cache_type_k: str = "q8_0", cache_type_v: str = "q8_0") -> List[str]:
         exe = self.get_server_exe()
         if not exe:
-            raise FileNotFoundError("Could not find llama-server.exe in RealmPlay or Aurelia runtime folders")
+            raise FileNotFoundError("Could not find llama-server.exe in RealmPlay runtime or root folder")
 
         command = [
             str(exe),
