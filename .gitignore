@@ -34,7 +34,11 @@ characters/
 /index.html
 
 # Model Checkpoints, Weights, & Heavy Binaries (Download separately)
-models/
+models/*
+!models/*/.gitkeep
+runtime/*
+!runtime/*/.gitkeep
+!runtime/*/*/.gitkeep
 *.gguf
 *.pth
 *.pt

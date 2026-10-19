@@ -6,10 +6,18 @@ echo               RealmPlay AI Roleplay Server
 echo ========================================================
 set "RP_PY=python"
 if exist "venv\Scripts\python.exe" (
-    set "RP_PY=python"
+    set "RP_PY=venv\Scripts\python.exe"
 ) else if exist ".venv\Scripts\python.exe" (
-    set "RP_PY=python"
+    set "RP_PY=.venv\Scripts\python.exe"
 )
+
+if not exist "config.json" (
+    if exist "config.example.json" (
+        echo [INFO] config.json not found. Creating from config.example.json ...
+        copy "config.example.json" "config.json" >nul
+    )
+)
+
 echo Starting server on http://localhost:8000 ...
 rem Do not use --reload here: its file watcher restarts the worker when the LLM log changes,
 rem which also terminates the managed llama-server process.

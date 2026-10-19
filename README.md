@@ -41,8 +41,21 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Configuration
-Copy `config.example.json` to `config.json` and adjust your model and server settings:
+### 3. Models Setup
+Download the recommended GGUF model and Vision Projector (or place your own GGUF models in `models/`):
+
+| Type | Recommended Model | File Name | Hugging Face Source |
+| :--- | :--- | :--- | :--- |
+| **LLM (Text)** | Qwen3.5-4B Uncensored (Aggressive) | `Qwen3.5-4B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf` | [HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive](https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive) |
+| **Vision (mmproj)** | Qwen3.5-4B Vision Projector | `mmproj-Qwen3.5-4B-mmproj-BF16.gguf` | [HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive](https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive) |
+
+Place the downloaded files into:
+- LLM text model: `models/text/` (or `models/`)
+- Vision mmproj: `models/vision/` (or `models/`)
+- `llama-server.exe` (from [llama.cpp releases](https://github.com/ggerganov/llama.cpp/releases)): place in `runtime/llama/` or project root folder.
+
+### 4. Configuration
+Copy `config.example.json` to `config.json` (auto-created on first run if omitted):
 ```bash
 # Windows:
 copy config.example.json config.json
@@ -50,10 +63,10 @@ copy config.example.json config.json
 cp config.example.json config.json
 ```
 
-### 4. Running RealmPlay
+### 5. Running RealmPlay
 ```bash
 python server.py
-# Or on Windows using batch script:
+# Or on Windows using launcher script:
 start_realmplay.bat
 ```
 Open your browser and go to `http://localhost:8000` to start chatting!

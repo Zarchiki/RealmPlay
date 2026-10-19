@@ -37,9 +37,16 @@ import comfy_client
 import text_engine
 import sampling
 import rewards
+import shutil
 from observability import ACTIVITY, RULES, DEFAULT_RULE_SETTINGS
 import re
 from difflib import SequenceMatcher
+
+if not os.path.exists("config.json") and os.path.exists("config.example.json"):
+    try:
+        shutil.copyfile("config.example.json", "config.json")
+    except Exception:
+        pass
 
 def _safe_name(name: str) -> str:
     """Reject path traversal in user-supplied names used to build file paths."""
