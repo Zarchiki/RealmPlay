@@ -42,7 +42,11 @@ pip install -r requirements.txt
 ```
 
 ### 3. Models Setup
-Download the recommended GGUF model and Vision Projector (or place your own GGUF models in `models/`):
+You can download models automatically using the included script:
+```bash
+python download_models.py
+```
+Or manually download the recommended GGUF model and Vision Projector:
 
 | Type | Recommended Model | File Name | Hugging Face Source |
 | :--- | :--- | :--- | :--- |

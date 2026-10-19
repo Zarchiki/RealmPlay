@@ -2640,6 +2640,19 @@
         <div class="panel-sub-title">
           <span>🧠 Built-in LLM Engine</span>
         </div>
+
+        <!-- Setup Alert Box when models or llama-server are missing -->
+        <div id="engine-setup-alert" style="display:none; margin: 10px 12px; padding: 12px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); font-size: 12px; line-height: 1.5;">
+          <div style="font-weight: 600; color: #f87171; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            ⚠️ ต้องการตั้งค่าโมเดล / llama-server
+          </div>
+          <div id="engine-setup-alert-text" style="color: var(--text-muted); margin-bottom: 8px;"></div>
+          <div style="display: flex; gap: 6px; flex-direction: column;">
+            <a href="https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive" target="_blank" style="color: #60a5fa; text-decoration: none;">📥 ดาวน์โหลดโมเดล Qwen3.5 (Hugging Face)</a>
+            <a href="https://github.com/ggerganov/llama.cpp/releases" target="_blank" style="color: #60a5fa; text-decoration: none;">📥 ดาวน์โหลด llama-server.exe (GitHub)</a>
+          </div>
+        </div>
+
         <div class="setting-group">
           <label class="setting-label">เลือกโมเดล LLM (.gguf):
             <button class="parameter-help" type="button" aria-label="คำอธิบายโมเดล LLM">?<span class="parameter-tooltip" role="tooltip">ไฟล์โมเดลภาษาหลักที่ใช้สร้างข้อความ ค่าที่แนะนำ: เลือก quantization Q4_K_M เป็นจุดเริ่มต้นที่สมดุลระหว่างคุณภาพและหน่วยความจำ; ใช้โมเดล 7B–8B หากมี RAM/VRAM ราว 8–12 GB และ 12B–14B หากมีอย่างน้อย 16 GB ผลเมื่อปรับ: โมเดลใหญ่หรือ quantization สูงขึ้นมักเข้าใจบริบทดีขึ้น แต่ใช้ RAM/VRAM มากขึ้นและตอบช้าลง</span></button>
@@ -6685,6 +6698,8 @@
     // --- ENGINE & SETTINGS LOGIC ---
     async function loadEngineModelsDropdown(selModel = "") {
       const select = document.getElementById("rail-engine-model");
+      const alertBox = document.getElementById("engine-setup-alert");
+      const alertText = document.getElementById("engine-setup-alert-text");
       if (!select) return;
       try {
         const res = await fetch("/api/engine/models", {
@@ -6692,14 +6707,37 @@
         });
         if (res.ok) {
           const data = await res.json();
+          const models = data.models || [];
+          const hasExe = data.has_server_exe;
+
           select.innerHTML = "";
-          (data.models || []).forEach(m => {
-            const opt = document.createElement("option");
-            opt.value = m.filename;
-            opt.textContent = `${m.filename} (${m.size})`;
-            if (m.filename === selModel) opt.selected = true;
-            select.appendChild(opt);
-          });
+          if (models.length === 0) {
+            select.innerHTML = '<option value="">-- ยังไม่พบไฟล์โมเดล .gguf ใน models/ --</option>';
+          } else {
+            models.forEach(m => {
+              const opt = document.createElement("option");
+              opt.value = m.filename;
+              opt.textContent = `${m.filename} (${m.size})`;
+              if (m.filename === selModel) opt.selected = true;
+              select.appendChild(opt);
+            });
+          }
+
+          if (alertBox && alertText) {
+            let warnings = [];
+            if (!hasExe) {
+              warnings.push("ยังไม่พบ <code>llama-server.exe</code> (นำไปวางใน <code>runtime/llama/</code> หรือโฟลเดอร์โปรเจกต์)");
+            }
+            if (models.length === 0) {
+              warnings.push("ยังไม่พบไฟล์โมเดล <code>.gguf</code> (ดาวน์โหลดแล้ววางใน <code>models/text/</code>)");
+            }
+            if (warnings.length > 0) {
+              alertText.innerHTML = warnings.join("<br>");
+              alertBox.style.display = "block";
+            } else {
+              alertBox.style.display = "none";
+            }
+          }
         }
       } catch (e) {}
     }
