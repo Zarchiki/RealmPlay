@@ -1,0 +1,74 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Local Logs & Outputs
+logs/
+*.log
+audio_output/
+generated_images/
+backups/
+
+# User Data & Private Sessions (Contains chat history, personal memories, user credentials)
+users/
+config.json
+data/*.sqlite*
+data/auth.json
+data/sessions.json
+data/registration_requests.json
+data/tunnel_state.json
+data/wildcards/
+data/wardrobe_catalog.json
+characters/
+/index.html
+
+# Model Checkpoints, Weights, & Heavy Binaries (Download separately)
+models/*
+!models/*/.gitkeep
+runtime/*
+!runtime/*/.gitkeep
+!runtime/*/*/.gitkeep
+*.gguf
+*.pth
+*.pt
+*.bin
+*.onnx
+*.safetensors
+runtime/
+runtime_packages/
+rvc_runtime/
+
+# OS & Editor generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+*.lnk
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Secrets & Environment variables
+.env
+.env.local
+.env.*.local
+secrets.json
+
+# Test & Temporary scratchpads
+test samples.txt
+test_s.py
+test_*.py
+tests/
