@@ -4688,6 +4688,13 @@ def list_available_models(user: str = Depends(get_current_user)):
     }
 
 # --- VOICE / TTS ENDPOINTS ---
+@app.get("/api/voice/voices")
+def list_tts_voices(user: str = Depends(get_current_user)):
+    """Return curated list of TTS voices across multiple international languages."""
+    import tts_voices
+    return {"voices": tts_voices.get_available_voices()}
+
+
 @app.post("/api/voice/speak")
 async def generate_speech(req: TTSRequest, user: str = Depends(get_current_user)):
     run_id = ACTIVITY.start(user, "tts", ("tts_dialogue",))

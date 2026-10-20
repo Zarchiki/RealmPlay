@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -2407,7 +2407,7 @@
 <body>
   <div id="pull-refresh-indicator" class="pull-refresh-indicator" role="status" aria-live="polite">
     <span class="pull-refresh-icon" aria-hidden="true">↓</span>
-    <span id="pull-refresh-label">ดึงลงเพื่อรีเฟรช</span>
+    <span id="pull-refresh-label">Pull down to refresh</span>
   </div>
 
   <!-- =========================================================
@@ -2423,22 +2423,22 @@
         <!-- Dot 1: Built-in LLM Engine -->
         <div class="status-dot-wrapper">
           <span class="status-dot" id="top-dot-engine"></span>
-          <span class="dot-tooltip" id="tooltip-engine">Engine: ตรวจสอบสถานะ...</span>
+          <span class="dot-tooltip" id="tooltip-engine">Engine: Checking status...</span>
         </div>
         <!-- Dot 2: ComfyUI -->
         <div class="status-dot-wrapper">
           <span class="status-dot" id="top-dot-comfy"></span>
-          <span class="dot-tooltip" id="tooltip-comfy">ComfyUI: ตรวจสอบสถานะ...</span>
+          <span class="dot-tooltip" id="tooltip-comfy">ComfyUI: Checking status...</span>
         </div>
         <!-- Dot 3: Voice (TTS + RVC) -->
         <div class="status-dot-wrapper">
           <span class="status-dot" id="top-dot-voice"></span>
-          <span class="dot-tooltip" id="tooltip-voice">Voice: ตรวจสอบสถานะ...</span>
+          <span class="dot-tooltip" id="tooltip-voice">Voice: Checking status...</span>
         </div>
         <!-- Dot 4: Tunnel Access -->
         <div class="status-dot-wrapper">
           <span class="status-dot" id="top-dot-tunnel"></span>
-          <span class="dot-tooltip" id="tooltip-tunnel">Tunnel Access: ตรวจสอบสถานะ...</span>
+          <span class="dot-tooltip" id="tooltip-tunnel">Tunnel Access: Checking status...</span>
         </div>
       </div>
     </div>
@@ -2470,16 +2470,16 @@
           <div class="dropdown-user-sub" id="drop-username">@guest</div>
         </div>
         <button class="dropdown-item" onclick="openPlayerRewardsModal(); toggleUserDropdown();">
-          <span>🏆</span> รางวัล & RPG (Level / Shop / Gacha)
+          <span>🏆</span> Rewards & RPG (Level / Shop / Gacha)
         </button>
         <button class="dropdown-item" onclick="openUserProfileModal(); toggleUserDropdown();">
           <span>👤</span> User Profile
         </button>
         <a href="/admin" target="_blank" class="dropdown-item" id="drop-admin-item" style="display: none; text-decoration: none; color: inherit;" onclick="toggleUserDropdown();">
-          <span>🛡️</span> จัดการระบบ (Admin Panel)
+          <span>🛡️</span> Admin Panel
         </a>
         <button class="dropdown-item danger" onclick="handleLogout()">
-          <span>🚪</span> สลับบัญชี / ออกจากระบบ
+          <span>🚪</span> Switch Account / Logout
         </button>
       </div>
     </div>
@@ -2542,20 +2542,20 @@
 
     <!-- 2. SUB-SIDEBAR (under Active Slim Tab) -->
     <aside class="sub-sidebar">
-      <div class="mobile-pane-header"><strong>เมนู</strong><button class="mobile-pane-close" onclick="closeMobilePanes()" aria-label="ปิดแผงซ้าย">✕</button></div>
+      <div class="mobile-pane-header"><strong>Menu</strong><button class="mobile-pane-close" onclick="closeMobilePanes()" aria-label="Close left panel">✕</button></div>
 
       <!-- SUBVIEW 1: Characters / Chats -->
       <div id="subview-characters">
         <div class="sub-sidebar-header">
           <!-- Top buttons: Add Char, Import Char (no drag & drop), Export Char -->
           <div class="char-actions-bar">
-            <button class="btn char-act-btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="openCharCreateModal()" title="สร้างตัวละครใหม่">
+            <button class="btn char-act-btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="openCharCreateModal()" title="Create new character">
               ➕ Add Char
             </button>
-            <button class="btn char-act-btn" id="btn-random-char" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white;" onclick="triggerRandomCharacter()" title="🎲 สุ่มสร้างตัวละครหญิง RPG (Wildcards Matrix & Deep Lore)">
+            <button class="btn char-act-btn" id="btn-random-char" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white;" onclick="triggerRandomCharacter()" title="🎲 Random RPG Character Generator">
               🎲 Random
             </button>
-            <button class="btn char-act-btn btn-secondary" onclick="document.getElementById('char-import-input').click()" title="นำเข้า Character Card (PNG V2)">
+            <button class="btn char-act-btn btn-secondary" onclick="document.getElementById('char-import-input').click()" title="Import Character Card (PNG V2)">
               🎴 Import
             </button>
             <input type="file" id="char-import-input" accept="image/png,.json,application/json" style="display: none;" onchange="uploadCharacterCard(event)">
@@ -2564,7 +2564,7 @@
           <!-- Character Search Box -->
           <div class="char-search-box">
             <span class="char-search-icon">🔍</span>
-            <input type="text" class="char-search-input" id="char-search-input" placeholder="ค้นหาตัวละคร..." oninput="filterCharacters(this.value)">
+            <input type="text" class="char-search-input" id="char-search-input" placeholder="Search characters..." oninput="filterCharacters(this.value)">
           </div>
         </div>
 
@@ -2578,7 +2578,7 @@
           <div class="character-card-pane-header">
             <span>🎴 Character Card</span>
             <div style="display:flex;align-items:center;gap:6px;">
-              <button class="mobile-pane-close" type="button" onclick="openCharEditModalCurrent()" title="แก้ไขการ์ดตัวละคร" aria-label="แก้ไขการ์ดตัวละคร">✎</button>
+              <button class="mobile-pane-close" type="button" onclick="openCharEditModalCurrent()" title="Edit character card" aria-label="Edit character card">✎</button>
               <button class="mobile-pane-close" type="button" onclick="closeCardViewer()" aria-label="ปิด Character Card">✕</button>
             </div>
           </div>
@@ -2587,7 +2587,7 @@
               <div class="profile-image-frame">
                 <img id="left-card-avatar" class="cover-avatar-center" alt="Character Card Image">
               </div>
-              <div class="profile-image-tools" aria-label="เครื่องมือ Character Card">
+              <div class="profile-image-tools" aria-label="Character Card tools">
                 <button type="button" class="btn btn-secondary profile-image-tool-button" title="Upload card image" aria-label="Upload card image" onclick="document.getElementById('character-card-image-file').click()">⬆</button>
                 <button type="button" class="btn btn-secondary profile-image-tool-button" title="Export PNG V2 Character Card" aria-label="Export PNG V2 Character Card" onclick="exportCurrentCharPNG()" style="font-size:11px;font-weight:800;">V2</button>
                 <button type="button" class="btn btn-secondary profile-image-tool-button" title="Export Character Card JSON" aria-label="Export Character Card JSON" onclick="exportCurrentCharJSON()" style="font-size:9px;font-weight:800;">JSON</button>
@@ -2595,7 +2595,7 @@
               </div>
               <input id="character-card-image-file" type="file" accept="image/*" hidden onchange="uploadCharacterCardImage(this)">
             </div>
-            <div class="character-card-document" id="left-character-card-fields">เลือกตัวละครเพื่อเปิด Character Card</div>
+            <div class="character-card-document" id="left-character-card-fields">Select a character to view details</div>
           </div>
         </section>
 
@@ -2609,7 +2609,7 @@
             <div class="sidebar-player-meta">
               <div class="sidebar-player-name-row">
                 <span class="sidebar-player-name" id="sidebar-player-name">Guest</span>
-                <span class="sidebar-player-coins" title="Coins สำหรับซื้อของขวัญและสุ่มกาชา">🪙 <span id="sidebar-player-coins">100</span></span>
+                <span class="sidebar-player-coins" title="Coins for gifts and gacha">🪙 <span id="sidebar-player-coins">100</span></span>
               </div>
               <div class="sidebar-player-exp-track">
                 <div class="sidebar-player-exp-fill" id="sidebar-player-exp-fill" style="width: 0%;"></div>
@@ -2622,13 +2622,13 @@
           </div>
           <div class="sidebar-player-actions">
             <button type="button" class="sidebar-player-btn" onclick="event.stopPropagation(); openPlayerRewardsModal(); switchRpgTab('stats');" title="อัปเกรดค่าพลัง & ทักษะ">
-              <span>📊 สเตตัส</span>
+              <span>📊 Status</span>
             </button>
             <button type="button" class="sidebar-player-btn" onclick="event.stopPropagation(); openPlayerRewardsModal(); switchRpgTab('shop');" title="ร้านค้าซื้อของขวัญ">
-              <span>🛒 ร้านค้า</span>
+              <span>🛒 Shop</span>
             </button>
             <button type="button" class="sidebar-player-btn" onclick="event.stopPropagation(); openPlayerRewardsModal(); switchRpgTab('gacha');" title="สุ่มกาชาไอเทมหายาก">
-              <span>🎲 กาชา</span>
+              <span>🎲 Gacha</span>
             </button>
           </div>
         </div>
@@ -2644,24 +2644,24 @@
         <!-- Setup Alert Box when models or llama-server are missing -->
         <div id="engine-setup-alert" style="display:none; margin: 10px 12px; padding: 12px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); font-size: 12px; line-height: 1.5;">
           <div style="font-weight: 600; color: #f87171; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-            ⚠️ ต้องการตั้งค่าโมเดล / llama-server
+            ⚠️ Model / llama-server Setup Required
           </div>
           <div id="engine-setup-alert-text" style="color: var(--text-muted); margin-bottom: 8px;"></div>
           <div style="display: flex; gap: 6px; flex-direction: column;">
-            <a href="https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive" target="_blank" style="color: #60a5fa; text-decoration: none;">📥 ดาวน์โหลดโมเดล Qwen3.5 (Hugging Face)</a>
-            <a href="https://github.com/ggerganov/llama.cpp/releases" target="_blank" style="color: #60a5fa; text-decoration: none;">📥 ดาวน์โหลด llama-server.exe (GitHub)</a>
+            <a href="https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive" target="_blank" style="color: #60a5fa; text-decoration: none;">📥 Download Qwen3.5 Model (Hugging Face)</a>
+            <a href="https://github.com/ggerganov/llama.cpp/releases" target="_blank" style="color: #60a5fa; text-decoration: none;">📥 Download llama-server.exe (GitHub)</a>
           </div>
         </div>
 
         <div class="setting-group">
-          <label class="setting-label">เลือกโมเดล LLM (.gguf):
-            <button class="parameter-help" type="button" aria-label="คำอธิบายโมเดล LLM">?<span class="parameter-tooltip" role="tooltip">ไฟล์โมเดลภาษาหลักที่ใช้สร้างข้อความ ค่าที่แนะนำ: เลือก quantization Q4_K_M เป็นจุดเริ่มต้นที่สมดุลระหว่างคุณภาพและหน่วยความจำ; ใช้โมเดล 7B–8B หากมี RAM/VRAM ราว 8–12 GB และ 12B–14B หากมีอย่างน้อย 16 GB ผลเมื่อปรับ: โมเดลใหญ่หรือ quantization สูงขึ้นมักเข้าใจบริบทดีขึ้น แต่ใช้ RAM/VRAM มากขึ้นและตอบช้าลง</span></button>
+          <label class="setting-label">Select LLM Model (.gguf):
+            <button class="parameter-help" type="button" aria-label="LLM Model details">?<span class="parameter-tooltip" role="tooltip">ไฟล์โมเดลภาษาหลักที่ใช้สร้างข้อความ ค่าที่แนะนำ: เลือก quantization Q4_K_M เป็นจุดเริ่มต้นที่สมดุลระหว่างคุณภาพและหน่วยความจำ; ใช้โมเดล 7B–8B หากมี RAM/VRAM ราว 8–12 GB และ 12B–14B หากมีอย่างน้อย 16 GB ผลเมื่อปรับ: โมเดลใหญ่หรือ quantization สูงขึ้นมักเข้าใจบริบทดีขึ้น แต่ใช้ RAM/VRAM มากขึ้นและตอบช้าลง</span></button>
           </label>
           <select id="rail-engine-model" class="form-input"></select>
         </div>
         <div class="setting-group">
           <label class="setting-label">Vision Model (mmproj):
-            <button class="parameter-help" type="button" aria-label="คำอธิบาย Vision Model">?<span class="parameter-tooltip" role="tooltip">ไฟล์เสริมสำหรับให้โมเดลอ่านข้อความจากภาพหรืออธิบายภาพ ค่าที่แนะนำ: เลือก mmproj ที่ระบุชื่อรุ่นเดียวกับ LLM ที่เลือกเท่านั้น; หากไม่ได้ส่งภาพเข้าแชต ให้ปล่อยว่างเพื่อลดการใช้หน่วยความจำ ผลเมื่อปรับ: การเลือกไฟล์ที่ไม่ตรงรุ่นอาจทำให้เปิด Engine ไม่ได้; การเปิด Vision จะเพิ่มการใช้หน่วยความจำและเวลาในการประมวลผลภาพ</span></button>
+            <button class="parameter-help" type="button" aria-label="Vision Model details">?<span class="parameter-tooltip" role="tooltip">ไฟล์เสริมสำหรับให้โมเดลอ่านข้อความจากภาพหรืออธิบายภาพ ค่าที่แนะนำ: เลือก mmproj ที่ระบุชื่อรุ่นเดียวกับ LLM ที่เลือกเท่านั้น; หากไม่ได้ส่งภาพเข้าแชต ให้ปล่อยว่างเพื่อลดการใช้หน่วยความจำ ผลเมื่อปรับ: การเลือกไฟล์ที่ไม่ตรงรุ่นอาจทำให้เปิด Engine ไม่ได้; การเปิด Vision จะเพิ่มการใช้หน่วยความจำและเวลาในการประมวลผลภาพ</span></button>
           </label>
           <select id="rail-engine-vision" class="form-input"></select>
         </div>
@@ -2676,7 +2676,7 @@
         </div>
         <div class="setting-group">
           <div class="setting-label">
-            <span>Temperature:<button class="parameter-help" type="button" aria-label="คำอธิบาย Temperature">?<span class="parameter-tooltip" role="tooltip">ควบคุมความสุ่มของคำตอบ ค่าที่แนะนำ: 0.7 สำหรับแชตทั่วไป, 0.5 สำหรับคำตอบแม่นยำ, 0.9 สำหรับบทบาทสมมติหรือไอเดียสร้างสรรค์ ผลเมื่อปรับ: ลดค่าจะทำให้ตอบนิ่งและคาดเดาได้มากขึ้น; เพิ่มค่าจะทำให้หลากหลายขึ้น แต่เสี่ยงหลุดประเด็นหรือแต่งข้อมูลมากขึ้น</span></button></span>
+            <span>Temperature:<button class="parameter-help" type="button" aria-label="Temperature details">?<span class="parameter-tooltip" role="tooltip">ควบคุมความสุ่มของคำตอบ ค่าที่แนะนำ: 0.7 สำหรับแชตทั่วไป, 0.5 สำหรับคำตอบแม่นยำ, 0.9 สำหรับบทบาทสมมติหรือไอเดียสร้างสรรค์ ผลเมื่อปรับ: ลดค่าจะทำให้ตอบนิ่งและคาดเดาได้มากขึ้น; เพิ่มค่าจะทำให้หลากหลายขึ้น แต่เสี่ยงหลุดประเด็นหรือแต่งข้อมูลมากขึ้น</span></button></span>
             <span id="rail-val-temp" class="slider-val-badge">0.7</span>
           </div>
           <div class="slider-row">
@@ -2685,7 +2685,7 @@
         </div>
         <div class="setting-group">
           <div class="setting-label">
-            <span>Top-P:<button class="parameter-help" type="button" aria-label="คำอธิบาย Top-P">?<span class="parameter-tooltip" role="tooltip">จำกัดชุดคำที่โมเดลนำมาสุ่มเลือก ค่าที่แนะนำ: 0.9 สำหรับการใช้งานส่วนใหญ่; ลดเป็น 0.8 หากคำตอบหลุดประเด็น และไม่ควรปรับสูงกว่า 0.95 ร่วมกับ Temperature สูง ผลเมื่อปรับ: ลดค่าจะทำให้เลือกคำแบบอนุรักษ์นิยมและโฟกัสขึ้น; เพิ่มค่าจะทำให้สำนวนหลากหลายขึ้น แต่อาจคาดเดาได้น้อยลง</span></button></span>
+            <span>Top-P:<button class="parameter-help" type="button" aria-label="Top-P details">?<span class="parameter-tooltip" role="tooltip">จำกัดชุดคำที่โมเดลนำมาสุ่มเลือก ค่าที่แนะนำ: 0.9 สำหรับการใช้งานส่วนใหญ่; ลดเป็น 0.8 หากคำตอบหลุดประเด็น และไม่ควรปรับสูงกว่า 0.95 ร่วมกับ Temperature สูง ผลเมื่อปรับ: ลดค่าจะทำให้เลือกคำแบบอนุรักษ์นิยมและโฟกัสขึ้น; เพิ่มค่าจะทำให้สำนวนหลากหลายขึ้น แต่อาจคาดเดาได้น้อยลง</span></button></span>
             <span id="rail-val-topp" class="slider-val-badge">0.9</span>
           </div>
           <div class="slider-row">
@@ -2694,7 +2694,7 @@
         </div>
         <div class="setting-group">
           <div class="setting-label">
-            <span>Repetition Penalty:<button class="parameter-help" type="button" aria-label="คำอธิบาย Repetition Penalty">?<span class="parameter-tooltip" role="tooltip">ลดโอกาสที่โมเดลจะใช้คำหรือวลีเดิมซ้ำ ค่าที่แนะนำ: 1.1 สำหรับทั่วไป; 1.15–1.2 หากวนซ้ำบ่อย; ไม่เกิน 1.25 หากภาษาเริ่มแปลก ผลเมื่อปรับ: เพิ่มค่าจะลดการพูดซ้ำ แต่ถ้าสูงเกินไปคำตอบอาจใช้คำฝืน ๆ หรือไม่ย้ำคำสำคัญตามธรรมชาติ</span></button></span>
+            <span>Repetition Penalty:<button class="parameter-help" type="button" aria-label="Repetition Penalty details">?<span class="parameter-tooltip" role="tooltip">ลดโอกาสที่โมเดลจะใช้คำหรือวลีเดิมซ้ำ ค่าที่แนะนำ: 1.1 สำหรับทั่วไป; 1.15–1.2 หากวนซ้ำบ่อย; ไม่เกิน 1.25 หากภาษาเริ่มแปลก ผลเมื่อปรับ: เพิ่มค่าจะลดการพูดซ้ำ แต่ถ้าสูงเกินไปคำตอบอาจใช้คำฝืน ๆ หรือไม่ย้ำคำสำคัญตามธรรมชาติ</span></button></span>
             <span id="rail-val-rep" class="slider-val-badge">1.1</span>
           </div>
           <div class="slider-row">
@@ -2705,17 +2705,17 @@
           <span>⏱️ Proactive auto-reply timing</span>
         </div>
         <div class="setting-group" style="gap:8px;">
-          <label class="setting-label">Minimum delay (seconds)<button class="parameter-help" type="button" aria-label="คำอธิบาย Minimum delay">?<span class="parameter-tooltip" role="tooltip">เวลารออย่างน้อยก่อนระบบส่งข้อความเชิงรุกครั้งถัดไป ระบบจะสุ่มเวลาโดยไม่ต่ำกว่าค่านี้ ค่าที่แนะนำ: 180 วินาที (3 นาที) เพื่อให้การทักดูเป็นธรรมชาติและไม่ถี่เกินไป ผลเมื่อปรับ: ลดค่าจะทำให้ระบบทักเร็วและบ่อยขึ้น; เพิ่มค่าจะเว้นช่วงนานขึ้น</span></button>
+          <label class="setting-label">Minimum delay (seconds)<button class="parameter-help" type="button" aria-label="คำอธิบาย Minimum delay">?<span class="parameter-tooltip" role="tooltip">เวลารออย่างน้อยก่อนระบบSend messageเชิงรุกครั้งถัดไป ระบบจะสุ่มเวลาโดยไม่ต่ำกว่าค่านี้ ค่าที่แนะนำ: 180 วินาที (3 นาที) เพื่อให้การทักดูเป็นธรรมชาติและไม่ถี่เกินไป ผลเมื่อปรับ: ลดค่าจะทำให้ระบบทักเร็วและบ่อยขึ้น; เพิ่มค่าจะเว้นช่วงนานขึ้น</span></button>
             <input type="number" id="proactive-min-seconds" class="form-input" min="30" max="86400" step="1" value="180" style="margin-top:4px;">
           </label>
-          <label class="setting-label">Maximum delay (seconds)<button class="parameter-help" type="button" aria-label="คำอธิบาย Maximum delay">?<span class="parameter-tooltip" role="tooltip">เวลารอมากที่สุดก่อนระบบส่งข้อความเชิงรุกครั้งถัดไป ค่านี้ต้องไม่น้อยกว่า Minimum delay ค่าที่แนะนำ: 360 วินาที (6 นาที) เมื่อ Minimum delay เป็น 180 วินาที ผลเมื่อปรับ: เพิ่มค่าจะทำให้จังหวะการทักมีความสุ่มและห่างขึ้น; ลดค่าให้ใกล้ Minimum delay จะทำให้เวลาทักสม่ำเสมอขึ้น</span></button>
+          <label class="setting-label">Maximum delay (seconds)<button class="parameter-help" type="button" aria-label="คำอธิบาย Maximum delay">?<span class="parameter-tooltip" role="tooltip">เวลารอมากที่สุดก่อนระบบSend messageเชิงรุกครั้งถัดไป ค่านี้ต้องไม่น้อยกว่า Minimum delay ค่าที่แนะนำ: 360 วินาที (6 นาที) เมื่อ Minimum delay เป็น 180 วินาที ผลเมื่อปรับ: เพิ่มค่าจะทำให้จังหวะการทักมีความสุ่มและห่างขึ้น; ลดค่าให้ใกล้ Minimum delay จะทำให้เวลาทักสม่ำเสมอขึ้น</span></button>
             <input type="number" id="proactive-max-seconds" class="form-input" min="30" max="86400" step="1" value="360" style="margin-top:4px;">
           </label>
           <label class="setting-label">Maximum consecutive replies<button class="parameter-help" type="button" aria-label="คำอธิบาย Maximum consecutive replies">?<span class="parameter-tooltip" role="tooltip">จำนวนข้อความเชิงรุกสูงสุดที่ระบบส่งติดกันได้ขณะผู้ใช้ยังไม่ตอบ เมื่อครบจำนวน ระบบจะพักการส่งจนกว่าผู้ใช้จะตอบกลับ ค่าที่แนะนำ: 3 ครั้ง เพื่อเตือนอย่างพอดีโดยไม่รบกวนมากเกินไป ผลเมื่อปรับ: เพิ่มค่าจะทำให้ระบบพยายามทักต่อเนื่องมากขึ้น; ลดค่าเป็น 1–2 จะลดโอกาสรบกวนผู้ใช้</span></button>
             <input type="number" id="proactive-max-consecutive" class="form-input" min="1" max="20" step="1" value="3" style="margin-top:4px;">
           </label>
           <p style="margin:0; color:var(--text-muted); font-size:11px; line-height:1.5;">ระบบจะสุ่มเวลาระหว่างค่าต่ำสุดและสูงสุด และเข้าสู่ Sleep เมื่อส่งครบจำนวนครั้งโดยผู้ใช้ยังไม่ตอบ</p>
-          <button class="btn btn-secondary" type="button" onclick="saveEngineProactiveSettings()">💾 บันทึก Proactive timing</button>
+          <button class="btn btn-secondary" type="button" onclick="saveEngineProactiveSettings()">💾 Save Proactive timing</button>
         </div>
         <button class="btn btn-secondary" onclick="saveSettingsModal()">💾 บันทึกค่า Sampling</button>
       </div>
@@ -2754,19 +2754,19 @@
         </div>
         <div class="setting-group">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label class="setting-label" style="margin: 0;">ความเร็วเสียง (Speed):</label>
+            <label class="setting-label" style="margin: 0;">Speech Speed:</label>
             <span id="rail-voice-rate-label" style="font-size: 12px; color: var(--primary); font-weight: 600;">+0%</span>
           </div>
           <input type="range" id="rail-voice-rate" min="-50" max="100" step="5" value="0" style="width: 100%; accent-color: var(--primary); cursor: pointer;" oninput="onVoiceRateInput(this.value)" onchange="autoSaveVoiceSettings()">
         </div>
         <div class="setting-group" style="gap:8px;">
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;"><input type="checkbox" id="rail-tts-autoload" onchange="onTtsAutomationChanged()"> สร้างเสียงอัตโนมัติเมื่อได้รับคำตอบ</label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;"><input type="checkbox" id="rail-tts-autoplay" onchange="onTtsAutomationChanged()"> เล่นเสียงอัตโนมัติ</label>
-          <span style="color:var(--text-muted); font-size:11px;">Autoplay จะเปิดการสร้างเสียงอัตโนมัติด้วย</span>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;"><input type="checkbox" id="rail-tts-autoload" onchange="onTtsAutomationChanged()"> Auto-generate voice on reply</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;"><input type="checkbox" id="rail-tts-autoplay" onchange="onTtsAutomationChanged()"> Auto-play voice</label>
+          <span style="color:var(--text-muted); font-size:11px;">Autoplay automatically enables generation</span>
         </div>
         <div class="setting-group">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <label class="setting-label" style="margin: 0; cursor: pointer;" for="rail-voice-rvc-check">เปิดใช้งาน RVC Voice Conversion:</label>
+            <label class="setting-label" style="margin: 0; cursor: pointer;" for="rail-voice-rvc-check">Enable RVC Voice Conversion:</label>
             <input type="checkbox" id="rail-voice-rvc-check" style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;" onchange="onRvcCheckboxChanged(this.checked)">
           </div>
         </div>
@@ -2776,7 +2776,7 @@
             <select id="rail-voice-rvc-model" class="form-input" onchange="onRvcModelChanged()"></select>
           </div>
           <div>
-            <label class="setting-label">Pitch Shift (ระดับเสียง semitones):</label>
+            <label class="setting-label">Pitch Shift (semitones):</label>
             <input type="number" id="rail-voice-pitch" class="form-input" value="0" onchange="autoSaveVoiceSettings()">
           </div>
           <div>
@@ -2786,7 +2786,7 @@
           <div style="display: flex; gap: 10px;">
             <div style="flex: 1;">
               <label class="setting-label" style="display: flex; justify-content: space-between;">
-                <span>Index Rate (สัดส่วน Feature):</span>
+                <span>Index Rate:</span>
                 <span id="rail-voice-index-rate-val" style="color:var(--primary); font-weight:600;">0.75</span>
               </label>
               <input type="range" id="rail-voice-index-rate" min="0" max="1" step="0.05" value="0.75" style="width: 100%; accent-color: var(--primary);" oninput="document.getElementById('rail-voice-index-rate-val').innerText=this.value" onchange="autoSaveVoiceSettings()">
@@ -2833,7 +2833,7 @@
           Rule Inspector tracks active rules, prompt traces, progress, errors, time, CPU/RAM and VRAM when available.
         </div>
         <div class="panel-sub-title" style="margin-top:4px;"><span>✅ Function Audit Checklist</span></div>
-        <p style="margin:0; color:var(--text-muted); font-size:12px; line-height:1.5;">ตรวจเฉพาะการเชื่อมต่อและการตั้งค่าที่อ่านได้ โดยไม่ส่งข้อความหรือสร้างภาพ/เสียงจริง</p>
+        <p style="margin:0; color:var(--text-muted); font-size:12px; line-height:1.5;">ตรวจเฉพาะการเชื่อมต่อและการตั้งค่าที่อ่านได้ โดยไม่Send messageหรือสร้างภาพ/เสียงจริง</p>
         <button class="btn" type="button" onclick="runRealmPlayAudit()">Run audit</button>
         <div id="rp-audit-results" class="rp-audit-results" aria-live="polite">กด Run audit เพื่อเริ่มตรวจสอบ</div>
       </div>
@@ -2841,7 +2841,7 @@
         <div class="panel-sub-title" style="justify-content:space-between"><span>🧭 Rules & Behaviour</span><button class="rp-chat-mobile-close" type="button" onclick="switchSlimTab('characters')" aria-label="ปิด">✕</button></div>
         <p style="margin:0; color:var(--text-muted); font-size:12px; line-height:1.5;">ปรับกติกากลางที่ใช้กับทุกตัวละคร แล้วกดบันทึก</p>
         <div class="setting-group" style="gap:10px; font-size:13px;">
-          <label title="ส่งข้อความทักอัตโนมัติเมื่อผู้ใช้ยังไม่ตอบ"><input type="checkbox" id="rail-rule-proactive-auto-reply"> Proactive auto reply</label>
+          <label title="Send messageทักอัตโนมัติเมื่อผู้ใช้ยังไม่ตอบ"><input type="checkbox" id="rail-rule-proactive-auto-reply"> Proactive auto reply</label>
           <label title="อัปเดต Status, Current Situation และ Permanent Memory เมื่อมีการเปลี่ยนแปลงจริง"><input type="checkbox" id="rail-rule-proactive-state"> Proactive state update</label>
           <label title="สั่ง ComfyUI เฉพาะคำขอสร้างภาพ"><input type="checkbox" id="rail-rule-image-trigger"> Image request trigger</label>
           <label title="ให้ตัวละครเปลี่ยนสถานะชุดเองเมื่อเหตุการณ์เปลี่ยนชุดจริง"><input type="checkbox" id="rail-rule-auto-wardrobe"> Auto wardrobe</label>
@@ -2899,13 +2899,13 @@
       <div class="chat-stream-box" id="chat-history">
         <!-- Rendered messages -->
       </div>
-      <button id="jump-to-latest-button" class="jump-to-latest-btn" type="button" onclick="scrollToLatestMessage()" aria-label="กลับไปข้อความล่าสุด">
+      <button id="jump-to-latest-button" class="jump-to-latest-btn" type="button" onclick="scrollToLatestMessage()" aria-label="กลับไปLatest message">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/><path d="M12 4v11"/><path d="M5 20h14"/></svg>
-        <span>ข้อความล่าสุด</span>
+        <span>Latest message</span>
       </button>
 
       <div id="multi-delete-bar" class="multi-delete-bar">
-        <button class="msg-act-btn" id="select-all-messages-button" onclick="toggleSelectAllMessages()" title="เลือกทั้งหมด">☑ ทั้งหมด</button>
+        <button class="msg-act-btn" id="select-all-messages-button" onclick="toggleSelectAllMessages()" title="Select all">☑ ทั้งหมด</button>
         <span id="multi-delete-count" class="multi-delete-count">เลือก 0 ข้อความ</span>
         <button class="msg-act-btn danger" id="delete-selected-messages-button" onclick="deleteSelectedMessages()" title="ลบข้อความที่เลือก" disabled>🗑️ ลบ</button>
         <button class="msg-act-btn" onclick="exitMessageSelection()" title="ยกเลิก">✕ ยกเลิก</button>
@@ -2931,7 +2931,7 @@
         </div>
 
         <!-- Send button -->
-        <button class="chat-send-btn" onclick="sendMessage()" title="ส่งข้อความ">
+        <button class="chat-send-btn" onclick="sendMessage()" title="Send message">
           ➤
         </button>
       </div>
@@ -3129,7 +3129,7 @@
       <div id="chat-session-list"></div><button class="btn btn-danger" onclick="startMessageSelection();closeChatManager()" title="เลือกหลายข้อความเพื่อลบ">☑ 🗑️</button>
     </div>
   </div>
-  <div id="context-usage-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeContextUsage()"><div class="modal-card" style="width:600px"><div class="modal-header"><div class="modal-title">◔ Context token weight</div><button class="modal-close-btn" onclick="closeContextUsage()">✕</button></div><div id="context-usage-content">กำลังอ่านข้อมูล...</div><div style="font-size:11px;color:var(--text-muted)">จำนวน token เป็นค่าประมาณ จำนวนจริงขึ้นกับ tokenizer ของโมเดล</div></div></div>
+  <div id="context-usage-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeContextUsage()"><div class="modal-card" style="width:600px"><div class="modal-header"><div class="modal-title">◔ Context token weight</div><button class="modal-close-btn" onclick="closeContextUsage()">✕</button></div><div id="context-usage-content">Loading data...</div><div style="font-size:11px;color:var(--text-muted)">จำนวน token เป็นค่าประมาณ จำนวนจริงขึ้นกับ tokenizer ของโมเดล</div></div></div>
 
   <!-- PLAYER REWARDS & RPG MODAL -->
   <div id="player-rewards-modal" class="modal-overlay" style="display: none;" onclick="if(event.target===this)closePlayerRewardsModal()">
@@ -3367,7 +3367,7 @@
     <div class="modal-card" style="width: 540px;">
       <div class="modal-header">
         <div class="modal-title">
-          <span>✨ สร้างตัวละครใหม่ (Add Character)</span>
+          <span>✨ Create new character (Add Character)</span>
         </div>
         <button class="modal-close-btn" onclick="closeCharCreateModal()">✕</button>
       </div>
@@ -3437,7 +3437,7 @@
     <div class="modal-card" style="width: 540px;">
       <div class="modal-header">
         <div class="modal-title">
-          <span>✏️ แก้ไขการ์ดตัวละคร (Edit Character Card)</span>
+          <span>✏️ Edit character card (Edit Character Card)</span>
         </div>
         <button class="modal-close-btn" onclick="closeCharEditModal()">✕</button>
       </div>
@@ -3611,7 +3611,7 @@
         distance = 0;
         indicator.classList.remove("visible", "ready");
         indicator.style.transform = "translate(-50%, -70px)";
-        label.textContent = "ดึงลงเพื่อรีเฟรช";
+        label.textContent = "Pull down to refresh";
       };
 
       document.addEventListener("touchstart", event => {
@@ -3634,7 +3634,7 @@
         indicator.classList.add("visible");
         indicator.classList.toggle("ready", distance >= threshold);
         indicator.style.transform = `translate(-50%, ${Math.min(24, -42 + distance * .6)}px)`;
-        label.textContent = distance >= threshold ? "ปล่อยเพื่อรีเฟรช" : "ดึงลงเพื่อรีเฟรช";
+        label.textContent = distance >= threshold ? "ปล่อยเพื่อรีเฟรช" : "Pull down to refresh";
       }, { passive:false });
 
       const finish = () => {
@@ -3817,7 +3817,7 @@
     // "all must be use Edit button before edit and save to close edit"
     async function toggleRightPaneEditMode() {
       if (!activeCharacter) {
-        alert("กรุณาเลือกตัวละครก่อนแก้ไข");
+        alert("กรุณาPlease select a character firstแก้ไข");
         return;
       }
 
@@ -3926,15 +3926,15 @@
           engDot.className = "status-dot";
           if (eng.state === "ready") {
             engDot.classList.add("green");
-            engTip.innerText = `Engine: พร้อมใช้งาน (${eng.model || 'Loaded'}) Port ${eng.port || 5006}`;
+            engTip.innerText = `Engine: Ready (${eng.model || 'Loaded'}) Port ${eng.port || 5006}`;
           } else if (eng.state === "loading") {
             engDot.classList.add("yellow");
-            engTip.innerText = `Engine: กำลังโหลดโมเดล...`;
+            engTip.innerText = `Engine: Loading model...`;
           } else if (eng.state === "error") {
             engDot.classList.add("red");
-            engTip.innerText = `Engine: ผิดพลาด (${eng.error || 'Check logs'})`;
+            engTip.innerText = `Engine: Error (${eng.error || 'Check logs'})`;
           } else {
-            engTip.innerText = `Engine: ปิดอยู่ (Stopped)`;
+            engTip.innerText = `Engine: Stopped`;
           }
         }
 
@@ -3974,7 +3974,7 @@
             voiceTip.innerText = `Voice: Edge-TTS + RVC Active (${voice.rvc_model ? voice.rvc_model.split(/[\\/]/).pop() : 'Loaded'})`;
           } else {
             voiceDot.classList.add("green");
-            voiceTip.innerText = `Voice: Edge-TTS พร้อมใช้งาน`;
+            voiceTip.innerText = `Voice: Edge-TTS Ready`;
           }
         }
         if (voiceStatusDot && voiceStatusText && voiceStatusDetails) {
@@ -3984,7 +3984,7 @@
             voiceStatusText.textContent = "🟢 Edge-TTS + RVC เปิดใช้งาน";
             voiceStatusDetails.textContent = `${voice.tts_voice || "Edge-TTS"} · RVC: ${modelName}`;
           } else {
-            voiceStatusText.textContent = "🟢 Edge-TTS พร้อมใช้งาน";
+            voiceStatusText.textContent = "🟢 Edge-TTS Ready";
             voiceStatusDetails.textContent = `${voice.tts_voice || "Edge-TTS"} · RVC ปิดอยู่`;
           }
         }
@@ -4064,25 +4064,25 @@
       if (!ind || !txt) return;
       if (st.state === "ready") {
         ind.style.background = "#10b981";
-        txt.innerText = `🟢 พร้อมใช้งาน (${st.model || 'Loaded'})`;
+        txt.innerText = `🟢 Ready (${st.model || 'Loaded'})`;
         det.innerText = `Port ${st.port || 5006} (Vision: ${st.vision ? 'On' : 'Off'})`;
         if (btnStart) { btnStart.disabled = false; btnStart.innerText = "🔄 รีสตาร์ทโมเดล"; }
         if (btnStop) btnStop.disabled = false;
       } else if (st.state === "loading") {
         ind.style.background = "#f59e0b";
-        txt.innerText = "🟡 กำลังโหลดโมเดล...";
+        txt.innerText = "🟡 Loading model...";
         det.innerText = "กำลังจัดสรร VRAM...";
         if (btnStart) { btnStart.disabled = true; btnStart.innerText = "⏳ กำลังโหลด..."; }
         if (btnStop) btnStop.disabled = false;
       } else if (st.state === "error") {
         ind.style.background = "#ef4444";
-        txt.innerText = "🔴 ผิดพลาด";
+        txt.innerText = "🔴 Error";
         det.innerText = st.error || "ตรวจสอบ log";
         if (btnStart) { btnStart.disabled = false; btnStart.innerText = "▶ เริ่มใหม่"; }
         if (btnStop) btnStop.disabled = false;
       } else {
         ind.style.background = "#64748b";
-        txt.innerText = "⚪ ปิดอยู่ (Stopped)";
+        txt.innerText = "⚪ Stopped";
         det.innerText = `Port ${st.port || 5006}`;
         if (btnStart) { btnStart.disabled = false; btnStart.innerText = "▶ Start Engine"; }
         if (btnStop) btnStop.disabled = true;
@@ -4382,7 +4382,7 @@
       return `<article class="character-card-field"><span class="character-card-field-label">${escapeHtml(label)}</span><div class="character-card-field-value">${escapeHtml(String(value || "—"))}</div></article>`;
     }
     async function openCharacterSummaryEditor() {
-      if (!activeCharacter) { showNotice("เลือกตัวละครก่อน", "error"); return; }
+      if (!activeCharacter) { showNotice("Please select a character first", "error"); return; }
       const name = activeCharacter;
       const modal = document.getElementById("character-summary-modal");
       const input = document.getElementById("character-summary-input");
@@ -4927,7 +4927,7 @@
 
     async function promptGiveGiftToCharacter() {
       if (!activeCharacter) {
-        showNotice("กรุณาเลือกตัวละครก่อน", "error");
+        showNotice("กรุณาPlease select a character first", "error");
         return;
       }
       const itemName = prompt("ระบุชื่อสิ่งของ / ของขวัญที่ต้องการมอบให้ " + activeCharacter + ":");
@@ -5872,7 +5872,7 @@
 
     async function printChatHistory(openDialog = true) {
       if (!activeCharacter) {
-        showNotice("กรุณาเลือกตัวละครก่อนพิมพ์ประวัติแชท", "error");
+        showNotice("กรุณาPlease select a character firstพิมพ์ประวัติแชท", "error");
         return;
       }
       if (!currentHistory.length) {
@@ -6045,7 +6045,7 @@
     // --- CHAT SEND & ACTIONS ---
     async function sendMessage() {
       if (!activeCharacter) {
-        alert("กรุณาเลือกตัวละครก่อนเริ่มส่งข้อความ");
+        alert("กรุณาPlease select a character firstเริ่มSend message");
         return;
       }
 
@@ -6080,7 +6080,7 @@
           })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || `ส่งข้อความไม่สำเร็จ (${res.status})`);
+        if (!res.ok) throw new Error(data.detail || `Send messageไม่สำเร็จ (${res.status})`);
         renderChatHistory(data.history, true);
         if (!ttsAutoplayEnabled) playSmsDing();
         autoLoadLatestTTS(data.history);
@@ -6110,7 +6110,7 @@
         }
       } catch (e) {
         console.error("sendMessage error:", e);
-        alert("ส่งข้อความไม่สำเร็จ: " + e.message);
+        alert("Send messageไม่สำเร็จ: " + e.message);
       }
     }
 
@@ -6367,22 +6367,22 @@
       try{const res=await fetch("/api/chat/continue",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({character_name:activeCharacter,message_index:idx})});const data=await res.json();if(!res.ok)throw new Error(data.detail||"เขียนต่อไม่สำเร็จ");renderChatHistory(data.history,true);autoLoadLatestTTS(data.history);}catch(e){showNotice(e.message,"error");}finally{if(button?.isConnected){button.disabled=false;button.innerHTML=old;}}
     }
     function toggleMessageSelectionMode(){messageSelectionMode?exitMessageSelection():startMessageSelection();}
-    function startMessageSelection(){if(!activeCharacter){showNotice("เลือกตัวละครก่อน","error");return;}messageSelectionMode=true;selectedMessageIndices.clear();document.getElementById("multi-delete-bar").classList.add("active");const toggle=document.getElementById("message-select-toggle");toggle?.classList.add("active");toggle?.setAttribute("aria-pressed","true");updateSelectionCount();renderChatHistory(currentHistory,false);}
+    function startMessageSelection(){if(!activeCharacter){showNotice("Please select a character first","error");return;}messageSelectionMode=true;selectedMessageIndices.clear();document.getElementById("multi-delete-bar").classList.add("active");const toggle=document.getElementById("message-select-toggle");toggle?.classList.add("active");toggle?.setAttribute("aria-pressed","true");updateSelectionCount();renderChatHistory(currentHistory,false);}
     function exitMessageSelection(){messageSelectionMode=false;selectedMessageIndices.clear();document.getElementById("multi-delete-bar").classList.remove("active");const toggle=document.getElementById("message-select-toggle");toggle?.classList.remove("active");toggle?.setAttribute("aria-pressed","false");renderChatHistory(currentHistory,false);}
     function toggleMessageSelection(i,on){on?selectedMessageIndices.add(i):selectedMessageIndices.delete(i);updateSelectionCount();const row=document.getElementById(`msg-row-${i}`);row?.classList.toggle("message-selected",on);const checkbox=row?.querySelector(".msg-select-box");if(checkbox)checkbox.checked=on;}
     function updateSelectionCount(){const count=selectedMessageIndices.size,total=currentHistory.length;document.getElementById("multi-delete-count").textContent=`เลือก ${count} ข้อความ`;const del=document.getElementById("delete-selected-messages-button");if(del)del.disabled=count===0;const all=document.getElementById("select-all-messages-button");if(all)all.textContent=total>0&&count===total?"☐ ยกเลิกทั้งหมด":"☑ ทั้งหมด";}
     function toggleSelectAllMessages(){if(selectedMessageIndices.size===currentHistory.length)selectedMessageIndices.clear();else currentHistory.forEach((_,i)=>selectedMessageIndices.add(i));updateSelectionCount();renderChatHistory(currentHistory,false);}
-    async function deleteSelectedMessages(){const indices=[...selectedMessageIndices];if(!indices.length)return;if(!await openConfirmDialog(`ลบ ${indices.length} ข้อความที่เลือกนี้หรือไม่?`,"ยืนยันการลบหลายข้อความ"))return;try{const res=await fetch("/api/chat/delete_messages",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({character_name:activeCharacter,indices:indices})});const data=await res.json();if(!res.ok)throw new Error(data.detail||"ลบไม่สำเร็จ");currentHistory=data.history;exitMessageSelection();}catch(e){showNotice(e.message,"error");}}
+    async function deleteSelectedMessages(){const indices=[...selectedMessageIndices];if(!indices.length)return;if(!await openConfirmDialog(`ลบ ${indices.length} ข้อความที่เลือกนี้หรือไม่?`,"ยืนยันการลบหลายข้อความ"))return;try{const res=await fetch("/api/chat/delete_messages",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({character_name:activeCharacter,indices:indices})});const data=await res.json();if(!res.ok)throw new Error(data.detail||"Failed to delete");currentHistory=data.history;exitMessageSelection();}catch(e){showNotice(e.message,"error");}}
 
     function closeChatManager(){document.getElementById("chat-manager-modal").style.display="none";}
-    async function openChatManager(){if(!activeCharacter){showNotice("เลือกตัวละครก่อน","error");return;}document.getElementById("chat-manager-modal").style.display="flex";await loadChatSessions();}
-    async function loadChatSessions(){const box=document.getElementById("chat-session-list");box.textContent="กำลังโหลด...";try{const res=await fetch("/api/characters/"+encodeURIComponent(activeCharacter)+"/chat-sessions",{headers:{"Authorization":"Bearer "+token}});const data=await res.json();if(!res.ok)throw new Error(data.detail||"โหลดไม่สำเร็จ");box.innerHTML="";(data.sessions||[]).forEach(x=>{const row=document.createElement("div");row.className="session-row "+(x.id===data.active_id?"active":"");const info=document.createElement("div");info.innerHTML="<strong>"+escapeHtml(x.title)+"</strong><div style='font-size:11px;color:var(--text-muted)'>"+(x.message_count||0)+" ข้อความ</div>";const open=document.createElement("button");open.className="msg-act-btn";open.textContent="▶";open.title="เปิดแชท";open.disabled=x.id===data.active_id;open.onclick=()=>activateChatSession(x.id);const del=document.createElement("button");del.className="msg-act-btn";del.textContent="🗑️";del.title="ลบแชท";del.disabled=x.id===data.active_id;del.onclick=()=>deleteChatSession(x.id);row.append(info,open,del);box.appendChild(row);});}catch(e){box.textContent=e.message;}}
-    async function createChatSession(){const title=document.getElementById("new-session-title").value.trim(),memory_mode=document.getElementById("new-session-memory").value;const res=await fetch("/api/characters/"+encodeURIComponent(activeCharacter)+"/chat-sessions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({title:title,memory_mode:memory_mode})});const data=await res.json();if(!res.ok){showNotice(data.detail||"สร้างไม่สำเร็จ","error");return;}currentHistory=data.history;document.getElementById("pane-input-memory").value=data.memory||"";renderChatHistory(currentHistory,true);document.getElementById("new-session-title").value="";await loadChatSessions();}
-    async function activateChatSession(id){const res=await fetch("/api/characters/"+encodeURIComponent(activeCharacter)+"/chat-sessions/"+id+"/activate",{method:"POST",headers:{"Authorization":"Bearer "+token}});const data=await res.json();if(!res.ok){showNotice(data.detail||"เปิดไม่สำเร็จ","error");return;}currentHistory=data.history;document.getElementById("pane-input-memory").value=data.memory||"";renderChatHistory(currentHistory,true);closeChatManager();}
-    async function deleteChatSession(id){if(!await openConfirmDialog("ลบแชทนี้ถาวรหรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้","ยืนยันการลบห้องแชท"))return;const res=await fetch("/api/characters/"+encodeURIComponent(activeCharacter)+"/chat-sessions/"+id,{method:"DELETE",headers:{"Authorization":"Bearer "+token}});const data=await res.json();if(!res.ok){showNotice(data.detail||"ลบไม่สำเร็จ","error");return;}await loadChatSessions();}
+    async function openChatManager(){if(!activeCharacter){showNotice("Please select a character first","error");return;}document.getElementById("chat-manager-modal").style.display="flex";await loadChatSessions();}
+    async function loadChatSessions(){const box=document.getElementById("chat-session-list");box.textContent="กำลังโหลด...";try{const res=await fetch("/api/characters/"+encodeURIComponent(activeCharacter)+"/chat-sessions",{headers:{"Authorization":"Bearer "+token}});const data=await res.json();if(!res.ok)throw new Error(data.detail||"Failed to load");box.innerHTML="";(data.sessions||[]).forEach(x=>{const row=document.createElement("div");row.className="session-row "+(x.id===data.active_id?"active":"");const info=document.createElement("div");info.innerHTML="<strong>"+escapeHtml(x.title)+"</strong><div style='font-size:11px;color:var(--text-muted)'>"+(x.message_count||0)+" ข้อความ</div>";const open=document.createElement("button");open.className="msg-act-btn";open.textContent="▶";open.title="Open chat";open.disabled=x.id===data.active_id;open.onclick=()=>activateChatSession(x.id);const del=document.createElement("button");del.className="msg-act-btn";del.textContent="🗑️";del.title="Delete chat";del.disabled=x.id===data.active_id;del.onclick=()=>deleteChatSession(x.id);row.append(info,open,del);box.appendChild(row);});}catch(e){box.textContent=e.message;}}
+    async function createChatSession(){const title=document.getElementById("new-session-title").value.trim(),memory_mode=document.getElementById("new-session-memory").value;const res=await fetch("/api/characters/"+encodeURIComponent(activeCharacter)+"/chat-sessions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({title:title,memory_mode:memory_mode})});const data=await res.json();if(!res.ok){showNotice(data.detail||"Failed to create","error");return;}currentHistory=data.history;document.getElementById("pane-input-memory").value=data.memory||"";renderChatHistory(currentHistory,true);document.getElementById("new-session-title").value="";await loadChatSessions();}
+    async function activateChatSession(id){const res=await fetch("/api/characters/"+encodeURIComponent(activeCharacter)+"/chat-sessions/"+id+"/activate",{method:"POST",headers:{"Authorization":"Bearer "+token}});const data=await res.json();if(!res.ok){showNotice(data.detail||"Failed to open","error");return;}currentHistory=data.history;document.getElementById("pane-input-memory").value=data.memory||"";renderChatHistory(currentHistory,true);closeChatManager();}
+    async function deleteChatSession(id){if(!await openConfirmDialog("Delete chatนี้ถาวรหรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้","Confirm Delete Chat"))return;const res=await fetch("/api/characters/"+encodeURIComponent(activeCharacter)+"/chat-sessions/"+id,{method:"DELETE",headers:{"Authorization":"Bearer "+token}});const data=await res.json();if(!res.ok){showNotice(data.detail||"Failed to delete","error");return;}await loadChatSessions();}
 
     function closeContextUsage(){document.getElementById("context-usage-modal").style.display="none";}
-    async function openContextUsage(){if(!activeCharacter){showNotice("เลือกตัวละครก่อน","error");return;}const modal=document.getElementById("context-usage-modal"),box=document.getElementById("context-usage-content");modal.style.display="flex";box.textContent="กำลังอ่านข้อมูล...";try{const res=await fetch("/api/chat/context_usage?character_name="+encodeURIComponent(activeCharacter),{headers:{"Authorization":"Bearer "+token}});const data=await res.json();if(!res.ok)throw new Error(data.detail||"โหลดไม่สำเร็จ");const colors=["#8b5cf6","#38bdf8","#34d399","#f59e0b","#f472b6","#64748b"];let cursor=0;const stops=data.parts.map((x,i)=>{const a=cursor;cursor+=x.percent;return colors[i%colors.length]+" "+a+"% "+cursor+"%";}).join(",");box.innerHTML='<div class="token-summary"><div class="token-pie" style="background:conic-gradient('+(stops||'#334155 0 100%')+')"><div class="token-pie-center"><strong>'+data.total+'</strong><span>'+data.context_percent+'% context</span></div></div><div>'+data.parts.map((x,i)=>'<div class="token-part"><i class="token-swatch" style="background:'+colors[i%colors.length]+'"></i><span>'+escapeHtml(x.name)+'</span><strong>'+x.tokens+' · '+x.percent+'%</strong></div>').join('')+'<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">Context limit '+Number(data.context_limit).toLocaleString()+' tokens</div></div></div>';}catch(e){box.textContent=e.message;}}
+    async function openContextUsage(){if(!activeCharacter){showNotice("Please select a character first","error");return;}const modal=document.getElementById("context-usage-modal"),box=document.getElementById("context-usage-content");modal.style.display="flex";box.textContent="Loading data...";try{const res=await fetch("/api/chat/context_usage?character_name="+encodeURIComponent(activeCharacter),{headers:{"Authorization":"Bearer "+token}});const data=await res.json();if(!res.ok)throw new Error(data.detail||"Failed to load");const colors=["#8b5cf6","#38bdf8","#34d399","#f59e0b","#f472b6","#64748b"];let cursor=0;const stops=data.parts.map((x,i)=>{const a=cursor;cursor+=x.percent;return colors[i%colors.length]+" "+a+"% "+cursor+"%";}).join(",");box.innerHTML='<div class="token-summary"><div class="token-pie" style="background:conic-gradient('+(stops||'#334155 0 100%')+')"><div class="token-pie-center"><strong>'+data.total+'</strong><span>'+data.context_percent+'% context</span></div></div><div>'+data.parts.map((x,i)=>'<div class="token-part"><i class="token-swatch" style="background:'+colors[i%colors.length]+'"></i><span>'+escapeHtml(x.name)+'</span><strong>'+x.tokens+' · '+x.percent+'%</strong></div>').join('')+'<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">Context limit '+Number(data.context_limit).toLocaleString()+' tokens</div></div></div>';}catch(e){box.textContent=e.message;}}
 
     function openEditMessage(idx) {
       const textDiv = document.getElementById(`msg-text-${idx}`);
@@ -6463,7 +6463,7 @@
         if (!res.ok) throw new Error(data.detail || "Request failed");
         renderChatHistory(data.history, false);
       } catch (e) {
-        showNotice("ลบไม่สำเร็จ: " + e.message, "error");
+        showNotice("Failed to delete: " + e.message, "error");
       }
     }
 
@@ -6517,7 +6517,7 @@
 
     function exportCurrentCharPNG() {
       if (!activeCharacter) {
-        alert("กรุณาเลือกตัวละครก่อนส่งออกการ์ด");
+        alert("กรุณาPlease select a character firstส่งออกการ์ด");
         return;
       }
       window.location.href = `/api/characters/${encodeURIComponent(activeCharacter)}/export`;
@@ -6555,9 +6555,9 @@
       } catch (err) {
         console.error("Random character error:", err);
         if (typeof showNotice === "function") {
-          showNotice("เกิดข้อผิดพลาดในการสุ่มสร้างตัวละคร: " + err.message, "error");
+          showNotice("เกิดข้อErrorในการสุ่มสร้างตัวละคร: " + err.message, "error");
         } else {
-          alert("เกิดข้อผิดพลาดในการสุ่มสร้างตัวละคร: " + err.message);
+          alert("เกิดข้อErrorในการสุ่มสร้างตัวละคร: " + err.message);
         }
       } finally {
         btn.disabled = false;
@@ -6620,7 +6620,7 @@
         await loadCharacters();
         selectCharacter(name);
       } catch (e) {
-        alert("❌ ข้อผิดพลาด: " + e.message);
+        alert("❌ ข้อError: " + e.message);
       }
     }
 
@@ -6686,7 +6686,7 @@
         await loadCharacters();
         if (activeCharacter === savedName) selectCharacter(savedName);
       } catch (e) {
-        alert("❌ ข้อผิดพลาด: " + e.message);
+        alert("❌ ข้อError: " + e.message);
       }
     }
     function exportCharCardFromModal() {
@@ -6712,7 +6712,7 @@
 
           select.innerHTML = "";
           if (models.length === 0) {
-            select.innerHTML = '<option value="">-- ยังไม่พบไฟล์โมเดล .gguf ใน models/ --</option>';
+            select.innerHTML = '<option value="">-- No .gguf models found in models/ --</option>';
           } else {
             models.forEach(m => {
               const opt = document.createElement("option");
@@ -6751,7 +6751,7 @@
         });
         if (res.ok) {
           const data = await res.json();
-          select.innerHTML = '<option value="">ไม่มี (ปิด Vision)</option>';
+          select.innerHTML = '<option value="">None (Disable Vision)</option>';
           (data.models || []).forEach(m => {
             const opt = document.createElement("option");
             opt.value = m.filename;
@@ -6766,6 +6766,43 @@
     let availableVoiceModels = [];
     let availableIndexFiles = [];
     let availableVoiceParams = {};
+    let availableTtsVoices = [];
+
+    async function loadTTSVoicesDropdown(selVoice = "") {
+      const select = document.getElementById("rail-voice-tts");
+      if (!select) return;
+      try {
+        const res = await fetch("/api/voice/voices", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          availableTtsVoices = data.voices || [];
+          if (availableTtsVoices.length > 0) {
+            // Group by language
+            const groups = {};
+            availableTtsVoices.forEach(v => {
+              const lang = v.language || v.locale || "Other";
+              if (!groups[lang]) groups[lang] = [];
+              groups[lang].push(v);
+            });
+            let html = "";
+            for (const [lang, vList] of Object.entries(groups)) {
+              html += `<optgroup label="🌐 ${lang}">`;
+              vList.forEach(v => {
+                const isSel = (v.id === selVoice || (!selVoice && v.id === "th-TH-PremwadeeNeural"));
+                html += `<option value="${v.id}" ${isSel ? 'selected' : ''}>${v.name}</option>`;
+              });
+              html += `</optgroup>`;
+            }
+            select.innerHTML = html;
+            if (selVoice) select.value = selVoice;
+          }
+        }
+      } catch (e) {
+        console.error("loadTTSVoicesDropdown error:", e);
+      }
+    }
 
     async function loadRVCModelsDropdown(selRvc = "", selIndex = "") {
       const select = document.getElementById("rail-voice-rvc-model");
@@ -6780,7 +6817,7 @@
           availableIndexFiles = data.index_files || [];
           availableVoiceParams = data.voice_params || {};
 
-          const opts = '<option value="">-- เลือกโมเดล RVC --</option>' + availableVoiceModels.map(m => 
+          const opts = '<option value="">-- Select RVC Model --</option>' + availableVoiceModels.map(m => 
             `<option value="${m.path}" ${m.path === selRvc ? 'selected' : ''}>🎙️ ${m.name}</option>`
           ).join('');
           if (select) select.innerHTML = opts;
@@ -6797,7 +6834,7 @@
     function populateIndexDropdown(selIndex = "") {
       const indexSelect = document.getElementById("rail-voice-rvc-index");
       if (!indexSelect) return;
-      let opts = '<option value="">(Auto) ค้นหาไฟล์ .index อัตโนมัติ</option><option value="none">🚫 ไม่ใช้ Feature Index</option>';
+      let opts = '<option value="">(Auto) Automatically detect .index file</option><option value="none">🚫 Do not use Feature Index</option>';
       opts += availableIndexFiles.map(idx => 
         `<option value="${idx.path}" ${idx.path === selIndex ? 'selected' : ''}>📁 ${idx.name}</option>`
       ).join('');
@@ -6932,7 +6969,7 @@
         updateParamsJsonDisplay();
         showNotice(`✅ บันทึก ${data.filename} สำหรับโมเดลเรียบร้อยแล้ว`, "success");
       } catch (err) {
-        alert("❌ เกิดข้อผิดพลาดในการบันทึก params.json: " + err.message);
+        alert("❌ เกิดข้อErrorในการบันทึก params.json: " + err.message);
       }
     }
 
@@ -6964,12 +7001,12 @@
         alert(`✓ กำลังโหลดโมเดล ${modelName} เข้าสู่ VRAM...`);
         pollAllServiceStatus();
       } catch (e) {
-        alert("❌ ข้อผิดพลาด: " + e.message);
+        alert("❌ ข้อError: " + e.message);
       }
     }
 
     async function stopBuiltinEngine() {
-      if (!confirm("คุณต้องการปิด Built-in LLM Engine และคืนค่า VRAM ใช่หรือไม่?")) return;
+      if (!confirm("Do you want to stop the Built-in LLM Engine and free VRAM?")) return;
       try {
         await fetch("/api/engine/stop", {
           method: "POST",
@@ -7107,6 +7144,7 @@
           if (autoplayInput) autoplayInput.checked = ttsAutoplayEnabled;
 
           toggleRVCUI(rvcOn);
+          await loadTTSVoicesDropdown(ttsVoice);
           await loadRVCModelsDropdown(rvcModel, rvcIndex);
         }
       } catch (e) {
@@ -7178,7 +7216,7 @@
         if (res.ok) {
           pollAllServiceStatus();
           if (showAlert) {
-            showNotice("บันทึกการตั้งค่าเสียงแล้ว");
+            showNotice("Save Voice Settingsแล้ว");
           }
         }
       } catch (e) {
@@ -7232,11 +7270,11 @@
           const audio = new Audio(data.audio_url);
           audio.play();
           if (rvcOn && !data.rvc_used) {
-            alert("⚠️ ระบบเล่นเสียงสำรองแบบ Edge-TTS เนื่องจากโมเดล RVC เกิดข้อผิดพลาด ตรวจสอบโมเดลที่เลือก");
+            alert("⚠️ ระบบเล่นเสียงสำรองแบบ Edge-TTS เนื่องจากโมเดล RVC เกิดข้อError ตรวจสอบโมเดลที่เลือก");
           }
         }
       } catch (e) {
-        alert("❌ ข้อผิดพลาดในการแปลงเสียง: " + e.message);
+        alert("❌ ข้อErrorในการแปลงเสียง: " + e.message);
       } finally {
         if (btn) {
           btn.disabled = false;
@@ -7337,8 +7375,8 @@
           body: JSON.stringify({ proactive:readProactiveSettings() })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "บันทึก Proactive timing ไม่สำเร็จ");
-        showNotice("บันทึก Proactive timing แล้ว");
+        if (!res.ok) throw new Error(data.detail || "Save Proactive timing ไม่สำเร็จ");
+        showNotice("Save Proactive timing แล้ว");
         startProactivePresencePolling();
       } catch (error) {
         showNotice(error.message, "error");
