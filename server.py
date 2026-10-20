@@ -56,10 +56,38 @@ def _safe_name(name: str) -> str:
 
 
 def response_language(text: str) -> str:
-    """Choose one of the two user-facing response rule sets only."""
-    thai = len(re.findall(r"[\u0E00-\u0E7F]", text or ""))
-    latin = len(re.findall(r"[A-Za-z]", text or ""))
-    return "thai" if thai and thai >= latin else "english"
+    """Detect language of user input to select corresponding linguistic rules.
+    Supports Thai, Japanese, Chinese (Simplified), French, Spanish, and English.
+    """
+    raw = text or ""
+    # 1. Thai
+    thai_count = len(re.findall(r"[\u0E00-\u0E7F]", raw))
+    # 2. Japanese (Hiragana + Katakana)
+    jp_kana = len(re.findall(r"[\u3040-\u309F\u30A0-\u30FF]", raw))
+    # 3. Chinese / Hanzi (CJK Unified Ideographs)
+    cjk_ideographs = len(re.findall(r"[\u4E00-\u9FFF]", raw))
+    # 4. Latin alphabet
+    latin_count = len(re.findall(r"[A-Za-zÀ-ÿ]", raw))
+
+    if thai_count > 0 and thai_count >= latin_count:
+        return "thai"
+    if jp_kana > 0:
+        return "japanese"
+    if cjk_ideographs > 0 and cjk_ideographs > latin_count:
+        return "chinese"
+
+    # Latin-based distinction: French, Spanish, or English
+    if latin_count > 0:
+        lower = raw.casefold()
+        french_markers = len(re.findall(r"\b(je|tu|il|elle|nous|vous|ils|elles|le|la|les|un|une|des|est|sont|dans|pour|avec|pas|ce|cette|mon|ma|mes|ton|ta|tes|son|sa|ses|qui|que|quoi|mais|ou|et|donc|or|ni|car|bonjour|salut|merci|comment|allez|faire|oui|non)\b|[éèêëàâùûîïôçœæ]", lower))
+        spanish_markers = len(re.findall(r"\b(yo|tú|él|ella|nosotros|vosotros|ellos|ellas|el|la|los|las|un|una|unos|unas|es|son|en|por|para|con|no|este|esta|estos|estas|mi|mis|tu|tus|su|sus|que|qué|pero|como|cómo|del|al|hola|gracias|amigo|amiga|bien|estás)\b|[áéíóúüñ¿¡]", lower))
+
+        if french_markers > spanish_markers and french_markers >= 1:
+            return "french"
+        if spanish_markers > french_markers and spanish_markers >= 1:
+            return "spanish"
+
+    return "english"
 
 
 # This rule is deliberately restricted to content the AI returns to the user.
@@ -74,15 +102,27 @@ LANGUAGE_ADAPTATION_SCOPE = (
 LANGUAGE_RULE_FILES = {
     "english": os.path.join("rules", "language", "1.English.md"),
     "thai": os.path.join("rules", "language", "2.Thai.md"),
+    "french": os.path.join("rules", "language", "3.French.md"),
+    "spanish": os.path.join("rules", "language", "4.Spanish.md"),
+    "japanese": os.path.join("rules", "language", "5.Japanese.md"),
+    "chinese": os.path.join("rules", "language", "6.Chinese.md"),
 }
 
 H_MODE_RULE_FILES = {
     "english": os.path.join("rules", "H-mode", "English.md"),
     "thai": os.path.join("rules", "H-mode", "Thai.md"),
+    "french": os.path.join("rules", "H-mode", "French.md"),
+    "spanish": os.path.join("rules", "H-mode", "Spanish.md"),
+    "japanese": os.path.join("rules", "H-mode", "Japanese.md"),
+    "chinese": os.path.join("rules", "H-mode", "Chinese.md"),
 }
 
 LINGUISTIC_RULE_FILES = {
     "thai": os.path.join("rules", "linguistic", "Thai.md"),
+    "french": os.path.join("rules", "linguistic", "French.md"),
+    "spanish": os.path.join("rules", "linguistic", "Spanish.md"),
+    "japanese": os.path.join("rules", "linguistic", "Japanese.md"),
+    "chinese": os.path.join("rules", "linguistic", "Chinese.md"),
 }
 
 
@@ -107,15 +147,18 @@ def _language_rule_sections(language: str) -> Dict[str, str]:
     return _rule_sections(path)
 
 
-def _thai_linguistic_nodes(
+def _dynamic_linguistic_nodes(
+    language: str,
     char: str,
     char_user_name: str,
     feminine: bool,
     emotion: str,
     setting_summary: str,
 ) -> str:
-    """Dynamically route only matching Thai linguistic neural nodes to save ~700-1000 tokens."""
-    path = LINGUISTIC_RULE_FILES.get("thai")
+    """Dynamically route matching language-specific linguistic neural nodes to save tokens.
+    Supports Thai, French, Spanish, Japanese, Chinese, etc.
+    """
+    path = LINGUISTIC_RULE_FILES.get(language)
     if not path or not os.path.exists(path):
         return ""
     sections = _rule_sections(path)
@@ -131,7 +174,11 @@ def _thai_linguistic_nodes(
 
     # 2. Historical / Royal Pronouns & Particles (Active only if setting matches)
     setting_cf = (setting_summary or "").casefold()
-    is_historical = any(k in setting_cf for k in ("พีเรียด", "ย้อนยุค", "จีน", "กำลังภายใน", "ขุนนาง", "ราชสำนัก", "wuxia", "period", "ancient"))
+    is_historical = any(k in setting_cf for k in (
+        "พีเรียด", "ย้อนยุค", "จีน", "กำลังภายใน", "ขุนนาง", "ราชสำนัก", "wuxia", "period", "ancient",
+        "medieval", "noble", "palace", "feudal", "samurai", "edo", "court", "époque", "realeza", "imperio",
+        "古风", "仙侠", "修真", "宫廷", "江湖", "武侠", "时代剧", "和風", "幕府"
+    ))
     if is_historical:
         if "pronoun special historical" in sections:
             blocks.append("[Historical Register]\n" + sections["pronoun special historical"])
@@ -139,7 +186,10 @@ def _thai_linguistic_nodes(
             blocks.append("[Historical Particles]\n" + sections["ending particles historical"])
 
     # 3. Aggressive Pronouns (Active only if furious/angry)
-    is_angry = any(k in emotion for k in ("angry", "furious", "rage", "โกรธ", "แค้น", "โมโห"))
+    is_angry = any(k in emotion for k in (
+        "angry", "furious", "rage", "โกรธ", "แค้น", "โมโห", "en colère", "furia", "furioso",
+        "怒り", "激怒", "憤慨", "愤怒", "狂怒", "暴怒", "生气"
+    ))
     if is_angry:
         if "pronoun aggressive" in sections:
             blocks.append("[Emotional Override]\n" + sections["pronoun aggressive"])
@@ -158,7 +208,19 @@ def _thai_linguistic_nodes(
 
     if not blocks:
         return ""
-    return "[Thai Linguistic Rules (Active Neural Nodes)]\n" + "\n\n".join(blocks)
+    lang_title = language.capitalize()
+    return f"[{lang_title} Linguistic Rules (Active Neural Nodes)]\n" + "\n\n".join(blocks)
+
+
+def _thai_linguistic_nodes(
+    char: str,
+    char_user_name: str,
+    feminine: bool,
+    emotion: str,
+    setting_summary: str,
+) -> str:
+    """Backward compatibility alias for _dynamic_linguistic_nodes."""
+    return _dynamic_linguistic_nodes("thai", char, char_user_name, feminine, emotion, setting_summary)
 
 
 def _h_mode_neural_network_nodes(language: str) -> Dict[str, Any]:
@@ -3137,16 +3199,15 @@ def build_system_instruction(
         avoid_block = f"""\n[Recent reply excerpts — do not reuse their wording, openings, actions, or sentence structure]\n{excerpts}{opening_rules}\n"""
 
     current_emotion_str = str(state.get("emotion") or "").casefold()
-    if rule_language == "thai":
-        thai_linguistic_rules = _thai_linguistic_nodes(
-            char=char,
-            char_user_name=char_user_name,
-            feminine=feminine_default,
-            emotion=current_emotion_str,
-            setting_summary=f"{cleaned_character_summary} {scenario_val}",
-        )
-    else:
-        thai_linguistic_rules = ""
+    # Route dynamic linguistic rules for Thai, Japanese, Chinese, French, Spanish, etc.
+    thai_linguistic_rules = _dynamic_linguistic_nodes(
+        language=rule_language,
+        char=char,
+        char_user_name=char_user_name,
+        feminine=feminine_default,
+        emotion=current_emotion_str,
+        setting_summary=f"{cleaned_character_summary} {scenario_val}",
+    )
 
     if rule_language == "thai":
         language_adaptation_rule = f"""[Language adaptation: Thai]
@@ -3155,11 +3216,35 @@ def build_system_instruction(
 - Thai roleplay should read as natural prose: use Thai pacing, culturally natural interjections, and context-appropriate politeness. Do not translate English sentence structure word-for-word into Thai.
 - Absolutely NEVER use a period (.) at the end of Thai sentences, dialogue, or actions (e.g. write "สวัสดีค่ะ" not "สวัสดีค่ะ.", and *ยิ้มบางๆ* not *ยิ้มบางๆ.*). In Thai typography, periods are never used to end sentences. Reserve periods solely for abbreviations, filenames, URLs, or decimal numbers.
 - Apply this Thai rule to every AI response visible to the user: narration, actions, spoken dialogue, OOC, general explanations, pronouns, particles, rhythm, punctuation, interjections, and dialogue text sent to TTS."""
+    elif rule_language == "french":
+        language_adaptation_rule = f"""[Language adaptation: French]
+- Respond in natural, expressive French by default. Keep proper names, quoted source text, code, and user-requested translations unchanged when needed.
+- Use idiomatic French pronouns (tutoiement 'tu' vs. vouvoiement 'vous'), agreements, and rhythm matching {char}'s relationship, hierarchy, emotion, and established voice.
+- French roleplay should sound like authentic original French prose, never a literal translation from English or another language. Adapt interjections, humor, and dialogue pacing seamlessly.
+- Apply this French rule to every AI response visible to the user: narration, actions, spoken dialogue, OOC, general explanations, pronouns, sentence rhythm, punctuation, interjections, and dialogue text sent to TTS."""
+    elif rule_language == "spanish":
+        language_adaptation_rule = f"""[Language adaptation: Spanish]
+- Respond in natural, immersive Spanish by default. Keep proper names, quoted source text, code, and user-requested translations unchanged when needed.
+- Use appropriate Spanish pronouns ('tú' vs. 'usted'), verb conjugations, and register matching {char}'s relationship, hierarchy, emotion, and established voice.
+- Spanish roleplay should sound like original Spanish prose, not a word-for-word translation. Adapt idioms, affective nuances, and dialogue pacing to the immediate situation.
+- Apply this Spanish rule to every AI response visible to the user: narration, actions, spoken dialogue, OOC, general explanations, pronouns, sentence rhythm, punctuation, interjections, and dialogue text sent to TTS."""
+    elif rule_language == "japanese":
+        language_adaptation_rule = f"""[Language adaptation: Japanese]
+- Respond in natural, idiomatic Japanese by default. Keep proper names, quoted source text, code, and user-requested translations unchanged when needed.
+- Maintain consistent first-person (一人称) and second-person (二人称) pronouns, honorifics/yakuwarigo (役割語), and ending particles (終助詞) matching {char}'s personality, age, hierarchy, and relationship with {char_user_name}.
+- Keep dialogue inside Japanese quotation marks 「...」 (or "...") and actions in *...*. Never produce awkward machine-translated sentence structures.
+- Apply this Japanese rule to every AI response visible to the user: narration, actions, spoken dialogue, OOC, general explanations, pronouns, sentence rhythm, punctuation, interjections, and dialogue text sent to TTS."""
+    elif rule_language == "chinese":
+        language_adaptation_rule = f"""[Language adaptation: Chinese Simplified]
+- Respond in natural, fluent Simplified Chinese by default. Keep proper names, quoted source text, code, and user-requested translations unchanged when needed.
+- Apply authentic Chinese pronouns, addressing terms (称谓体系), and modal particles (语气助词) matching {char}'s personality, status, and relationship with {char_user_name}.
+- Keep dialogue inside quotation marks "..." (or 「...」) and actions in *...*. Avoid clumsy translationese (翻译腔), maintaining vivid prose rhythm.
+- Apply this Chinese rule to every AI response visible to the user: narration, actions, spoken dialogue, OOC, general explanations, pronouns, sentence rhythm, punctuation, interjections, and dialogue text sent to TTS."""
     else:
         language_adaptation_rule = f"""[Language adaptation: English]
 - Respond in natural English by default. Keep proper names, quoted source text, code, and user-requested translations unchanged when needed.
-- Use English pronouns, contractions, rhythm, idiom, punctuation, and register that match {char}'s relationship, hierarchy, emotion, and established voice. Never add Thai particles or Thai-only honorific logic to English output.
-- English roleplay should sound like original English prose, not a literal translation from Thai. Adapt interjections, humor, emotional expression, and dialogue pacing to the immediate context.
+- Use English pronouns, contractions, rhythm, idiom, punctuation, and register that match {char}'s relationship, hierarchy, emotion, and established voice. Never add foreign particles or honorific logic to English output.
+- English roleplay should sound like original English prose, not a literal translation from another language. Adapt interjections, humor, emotional expression, and dialogue pacing to the immediate context.
 - Apply this English rule to every AI response visible to the user: narration, actions, spoken dialogue, OOC, general explanations, pronouns, sentence rhythm, punctuation, interjections, and the dialogue text sent to TTS."""
 
     primary_language_rules = language_use_rule_block(
