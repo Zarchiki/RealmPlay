@@ -130,7 +130,7 @@ Or manually download the recommended GGUF model and Vision Projector:
 | Type | Recommended Model | File Name | Hugging Face Source |
 | :--- | :--- | :--- | :--- |
 | **LLM (Text)** | Qwen3.5-4B Uncensored (Aggressive) | `Qwen3.5-4B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf` | [HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive](https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive) |
-| **Vision (mmproj)** | Qwen3.5-4B Vision Projector | `mmproj-Qwen3.5-4B-mmproj-BF16.gguf` | [HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive](https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive) |
+| **Vision (mmproj)** | Qwen3.5-4B Vision Projector | `mmproj-Qwen3.5-4B-Uncensored-HauhauCS-Aggressive-BF16.gguf` | [HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive](https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive) |
 
 Place the downloaded files into:
 - LLM text model: `models/text/` (or `models/`)

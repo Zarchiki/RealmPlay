@@ -1,5 +1,46 @@
 # Patch Notes
 
+## 2026-11-14 — Fix Hugging Face Model Fetching URL for Vision mmproj
+
+### What changed
+- **Model Downloader & Vision Projector URL ([`download_models.py`](file:///k:/RealmPlay-Standalone/download_models.py)):**
+  - Discovered that the vision mmproj URL in Hugging Face returned `404 Not Found` due to filename mismatch:
+    - Old/Invalid: `mmproj-Qwen3.5-4B-mmproj-BF16.gguf`
+    - Actual repo path: `mmproj-Qwen3.5-4B-Uncensored-HauhauCS-Aggressive-BF16.gguf`
+  - Fixed download URL and destination path in `download_models.py`.
+  - Updated default `mmproj` config filename in `config.example.json` and `config.json`.
+  - Updated model documentation table in `README.md`.
+
+### Verification
+- Queried Hugging Face API and performed HTTP GET verification for both models in `download_models.py`:
+  - `Qwen3.5-4B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf`: HTTP 200 (~2.7 GB)
+  - `mmproj-Qwen3.5-4B-Uncensored-HauhauCS-Aggressive-BF16.gguf`: HTTP 200 (~675 MB)
+
+
+
+## 2026-11-14 — Single-User Mode without Password Authentication
+
+### What changed
+- **Configuration (`config.example.json` & `config.json`):**
+  - Added `"single_user_mode": true` under `"server"` block.
+- **Backend Authentication Dependency ([`server.py`](file:///k:/RealmPlay-Standalone/server.py)):**
+  - Added `is_single_user_mode()` helper checking `server.single_user_mode` in `config.json`.
+  - Updated `get_current_user()`: when `single_user_mode` is enabled, automatically resolves as `"admin"` (with built-in admin permissions) if no Authorization header or token is provided.
+  - Updated `/api/auth/me` response to include `"single_user_mode": is_single_user_mode()`.
+- **Frontend Automatic Login ([`static/js/app_main.js`](file:///k:/RealmPlay-Standalone/static/js/app_main.js)):**
+  - Updated `window.onload` and `fetchUserProfile()`: permits fetching profile without pre-existing token; in single-user mode, automatically initializes session for `admin` and skips displaying `#auth-screen`.
+
+### Rules for other agents (avoid conflicts)
+- Keep `single_user_mode` configurable via `config.json` under `server.single_user_mode`.
+- When `single_user_mode` is false or unset, standard Bearer token validation and login prompt remain intact.
+
+### Verification
+- `python -c "import py_compile; py_compile.compile('server.py', doraise=True)"` passed with code 0.
+- ASGI AsyncClient testing without Authorization headers successfully returned HTTP 200 for `/api/auth/me` (user: admin, is_admin: True, single_user_mode: True), `/api/characters`, `/api/rules`, and `/api/settings`.
+- End-to-end frontend assets loaded without missing references.
+
+
+
 ## 2026-11-11 — Support CNC Session Agreement to Disable Automatic Scene Stop on Character Narrated Action Refusal
 
 ### What changed

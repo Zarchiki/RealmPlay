@@ -1090,12 +1090,25 @@ app.mount("/audio", StaticFiles(directory="audio_output"), name="audio")
 app.mount("/images", StaticFiles(directory="generated_images"), name="images")
 
 # --- AUTHENTICATION DEPENDENCY ---
+def is_single_user_mode() -> bool:
+    try:
+        if os.path.exists("config.json"):
+            with open("config.json", "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+            return bool(cfg.get("server", {}).get("single_user_mode", False))
+    except Exception:
+        pass
+    return False
+
 def get_current_user(authorization: Optional[str] = Header(None)) -> str:
     if authorization:
         token = authorization.replace("Bearer ", "").strip()
         username = auth.validate_token(token)
         if username:
             return username
+    # In single user mode, automatically assign the default admin account without requiring login
+    if is_single_user_mode():
+        return "admin"
     # Never silently substitute a shared local account.  Doing so can make an
     # expired mobile session appear as a different user and split chat state.
     raise HTTPException(
@@ -1384,6 +1397,7 @@ def get_me(user: str = Depends(get_current_user)):
         "display_name": prof["display_name"],
         "persona": prof["persona"],
         "is_admin": auth.is_admin_user(user),
+        "single_user_mode": is_single_user_mode(),
         "settings": settings,
         "rewards": rewards.get_player_rewards(user)
     }

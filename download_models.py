@@ -19,8 +19,8 @@ MODELS = [
     },
     {
         "name": "Qwen3.5-4B Vision mmproj (Multimodal)",
-        "url": "https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive/resolve/main/mmproj-Qwen3.5-4B-mmproj-BF16.gguf",
-        "dest": BASE_DIR / "models" / "vision" / "mmproj-Qwen3.5-4B-mmproj-BF16.gguf",
+        "url": "https://huggingface.co/HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive/resolve/main/mmproj-Qwen3.5-4B-Uncensored-HauhauCS-Aggressive-BF16.gguf",
+        "dest": BASE_DIR / "models" / "vision" / "mmproj-Qwen3.5-4B-Uncensored-HauhauCS-Aggressive-BF16.gguf",
         "size_str": "~645 MB"
     }
 ]

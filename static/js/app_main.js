@@ -201,7 +201,7 @@
     // --- INITIALIZATION ---
     window.onload = async () => {
       initProfileCardCollapsibles();
-      if (token && currentUser && await fetchUserProfile()) {
+      if ((token && currentUser && await fetchUserProfile()) || await fetchUserProfile()) {
         document.getElementById("auth-screen").style.display = "none";
         await loadCharacters();
         await syncVoiceSettingsUI();
@@ -642,9 +642,8 @@
     // --- USER PROFILE & AUTH ---
     async function fetchUserProfile() {
       try {
-        const res = await fetch("/api/auth/me", {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
+        const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+        const res = await fetch("/api/auth/me", { headers });
         if (!res.ok) {
           console.warn("fetchUserProfile /api/auth/me status:", res.status);
           return false;
@@ -654,6 +653,11 @@
           currentUser = data.username;
           currentDisplayName = data.display_name || "";
           currentPersona = data.persona || "";
+          if (data.single_user_mode) {
+            token = token || "single_user_token";
+            sessionStorage.setItem("realmplay_user", currentUser);
+            sessionStorage.setItem("realmplay_token", token);
+          }
 
           const topUser = document.getElementById("top-user-name");
           if (topUser) topUser.innerText = currentDisplayName || currentUser;
