@@ -1,0 +1,1 @@
+- Start with the character's answer or spoken dialogue, not narration, unless the user asks what the character is doing. Do not echo the user's wording or invent a question when unnecessary.

@@ -16,21 +16,25 @@ RULES = {
     "system_instruction": {"stage": "llm", "description": "Character Card, user context, and active state sent as the LLM system instruction."},
     "language_adaptation": {"stage": "llm/tts", "description": "Selects Thai or English from the latest user message and applies it only to every user-facing AI response, including TTS dialogue."},
     "self_recognition": {"stage": "llm", "description": "Makes the character aware of its card identity, appearance, personality, memories, current situation, outfit, emotion, recent actions, and location without inventing missing facts."},
+    "memory_record": {"stage": "state/llm", "description": "Records new durable facts (multilingual names, secrets, promises, milestones, preferences) into Permanent Memory while rejecting transient actions or moods."},
+    "symbol_usage": {"stage": "llm", "description": "Visible formatting symbols: dialogue in quotes, actions in asterisks, thoughts in parentheses, closed state blocks."},
     "non_literal_writing": {"stage": "llm", "description": "Roleplay formatting, natural scene progression, anti-repetition, and no assistant-like prose."},
+    "proactive_character_behavior": {"stage": "llm", "description": "Makes only characters whose declared personality is proactive, assertive, dominant, bold, or initiator-led advance scenes through decisions and visible actions instead of repeated questions."},
     "loop_guard": {"stage": "llm/output", "description": "Caps corrective retries at one, compares against recent replies, and removes adjacent duplicate output blocks."},
     "prohibitions": {"stage": "llm/output", "description": "Prevents hidden reasoning, fake tool outcomes, system-prompt disclosure, control of the user's character, and malformed internal state from being shown."},
+    "thinking_mode": {"stage": "llm", "description": "Directs the model to internally reason through intent, emotional trajectory, and persona dynamics before writing dialogue."},
     "pronoun": {"stage": "llm", "description": "Thai pronouns and ending particles selected from relationship, hierarchy, and emotion."},
     "expressive_vocalization": {"stage": "llm/tts", "description": "Allows natural interjections, breaths, laughs, gasps, and short vocal reactions only when the immediate roleplay context and character voice support them."},
     "time_recognition": {"stage": "state/llm/image", "description": "Keeps an explicit story clock and place when a validated {{time}} state block changes them."},
     "emotional_clarity": {"stage": "state/llm/image", "description": "Keeps emotion name, intensity, and a short cause when a validated {{emotion}} block changes them."},
-    "time_recognition": {"stage": "state/llm/image", "description": "Keeps an explicit story clock and place when a validated {{time}} state block changes them."},
-    "emotional_clarity": {"stage": "state/llm/image", "description": "Keeps emotion name, intensity, and a short cause when a validated {{emotion}} block changes them."},
     "proactive_state": {"stage": "llm", "description": "Always-active fenced Status, Situation, and Emotion snapshots update isolated state on every dialogue reply; memory records only new durable facts."},
-    "image_trigger": {"stage": "image", "description": "ComfyUI is called only for an explicit image request or an image-generation command."},
+    "image_trigger": {"stage": "image", "description": "ComfyUI is called for /image commands, Direct triggers (ถ่ายรูป, ขอรูป, take a selfie), Indirect visual requests (อยากเห็น, อยากดู, ขอดูหน่อย, โชว์ให้ดู, let me see), and autonomous Character Selfies."},
     "image_context": {"stage": "image", "description": "Scene/action first, then per-user appearance, wardrobe, emotion, configured situation/memory, and suffix."},
     "wardrobe": {"stage": "state/image", "description": "Uses the active wardrobe selection. Automatic clothing changes are opt-in and require a canonical {{wardrobe}} state block."},
+    "active_outfit": {"stage": "image", "description": "Uses only the currently active outfit slots when assembling the image prompt; stored wardrobe items are excluded."},
+    "active_sd_prompt": {"stage": "image", "description": "Builds the active Stable Diffusion prompt from the durable outfit, appearance, scene, and configured local image workflow."},
     "tts_dialogue": {"stage": "tts", "description": "Sends quoted dialogue to TTS; falls back to the complete supplied text when no dialogue is found."},
-    "nsfw": {"stage": "policy", "description": "A visible policy mode is included with every request. It never silently rewrites the configured local prompts."},
+    "content_policy_local_model": {"stage": "policy", "description": "Applies the selected local-model content mode. It is a response policy, not an image-prompt rule, and never rewrites the configured local workflow silently."},
 }
 
 DEFAULT_RULE_SETTINGS = {
@@ -43,6 +47,8 @@ DEFAULT_RULE_SETTINGS = {
     "auto_wardrobe": False,
     "nsfw_mode": "local",  # local | fade_to_black | block
     "trace_prompts": True,
+    "thinking_mode": False,
+    "cnc_roleplay_enabled": False,
 }
 
 
@@ -110,7 +116,8 @@ class ActivityRegistry:
                 record["prompts"][prompt_name] = prompt
             self._log(record)
 
-    def finish(self, run_id: str, error: str | None = None):
+    def finish(self, run_id: str, error: str | None = None, stage: str | None = None):
+        """Finish an activity, optionally with a successful terminal stage."""
         with self._lock:
             self._aborters.pop(run_id, None)
             record = self._active.pop(run_id, None)
@@ -118,7 +125,7 @@ class ActivityRegistry:
                 return
             cancelled = record.get("cancel_requested")
             record["status"] = "cancelled" if cancelled else ("error" if error else "complete")
-            record["stage"] = "Cancelled" if cancelled else ("Failed" if error else "Complete")
+            record["stage"] = "Cancelled" if cancelled else ("Failed" if error else (stage or "Complete"))
             record["progress"] = 100 if not error else record["progress"]
             record["error"] = error
             record["updated_at"] = time.time()

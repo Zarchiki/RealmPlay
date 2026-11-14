@@ -1,0 +1,8 @@
+[
+  {"id":"h_silk_blindfold","name":"ผ้าปิดตาผ้าไหม","type":"h_item","category":"kinky_toy","price":90,"rarity":"Common","icon":"🖤","desc":"ผ้าปิดตานุ่มสำหรับ roleplay แบบยินยอม","effects":{"affection":4,"arousal":3}},
+  {"id":"h_velvet_cuffs","name":"ปลอกข้อมือกำมะหยี่","type":"h_item","category":"kinky_toy","price":140,"rarity":"Uncommon","icon":"⛓️","desc":"ปลอกข้อมือบุนุ่มสำหรับเกมบทบาทสมมติ","effects":{"affection":6,"arousal":4}},
+  {"id":"h_teasing_feather","name":"ขนนกสำหรับหยอกล้อ","type":"h_item","category":"kinky_toy","price":75,"rarity":"Common","icon":"🪶","desc":"พร็อพสัมผัสเบา ๆ สำหรับเพิ่มบรรยากาศ","effects":{"affection":4,"arousal":3}},
+  {"id":"h_wand_massager","name":"Wand Massager","type":"h_item","category":"kinky_toy","price":280,"rarity":"Rare","icon":"✨","desc":"อุปกรณ์ massage สำหรับผู้ใหญ่ ใช้เมื่อทุกฝ่ายยินยอม","effects":{"affection":10,"arousal":7}},
+  {"id":"h_remote_vibrator","name":"Remote Vibrator","type":"h_item","category":"kinky_toy","price":420,"rarity":"Rare","icon":"🎛️","desc":"อุปกรณ์สำหรับผู้ใหญ่แบบควบคุมระยะไกล","effects":{"affection":12,"arousal":8}},
+  {"id":"h_bondage_kit","name":"Kinky Bondage Kit","type":"h_item","category":"kinky_toy","price":650,"rarity":"Super Rare","icon":"🔗","desc":"ชุดพร็อพ roleplay สำหรับผู้ใหญ่ โดยต้องมีข้อตกลงชัดเจน","effects":{"affection":18,"arousal":10}}
+]

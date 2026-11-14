@@ -98,8 +98,18 @@ must persist across sessions.
    blocks.
 4. The parser strips valid state blocks before saving/displaying the reply.
 5. The state writer persists only the changed per-user files.
-6. Image generation takes scene/action first, then `appearance.md`, wardrobe,
-   emotion, and configured image suffixes.
+6. Image generation takes scene/action first, then `appearance.md`, the
+   resolved `active_outfit`, emotion, and configured image suffixes. Removed
+   clothing returns to inventory before `active_outfit` is rebuilt.
+
+During an active H-Mode scene, per-turn metadata synchronizes the canonical
+scene state: `stage`, `scene_stage`, `stage_level`, `turns_in_level`,
+`h_energy`, `orgasm_counter`, `climax_peaks`, `active`, and the current
+posture/location when known. This state is authoritative for scene routing.
+
+`Current Situation` describes the current scene/action in English and does not
+carry the wardrobe list. Image generation uses currently worn items only, so
+removed clothing cannot reappear from stale context.
 
 ## Compatibility
 

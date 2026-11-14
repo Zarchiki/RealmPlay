@@ -1,0 +1,12 @@
+[
+  {"id":"gg_candy","name":"ลูกอมรสหวาน","type":"consumable","rarity":"Common","icon":"🍬","desc":"ลูกอมรสผลไม้หอมหวาน","weight":25},
+  {"id":"gg_cookie","name":"คุกกี้เนยสด","type":"consumable","rarity":"Common","icon":"🍪","desc":"คุกกี้อบกรอบหอมกรุ่น","weight":25},
+  {"id":"gg_jasmine_tea","name":"ชาร้อนกลิ่นมะลิ","type":"consumable","rarity":"Common","icon":"🍵","desc":"น้ำชากลิ่นหอมละมุน","weight":20},
+  {"id":"gg_roses","name":"ช่อดอกกุหลาบแดง","type":"gift","rarity":"Uncommon","icon":"🌹","desc":"กุหลาบแดงช่อโตแสดงความรัก","weight":15},
+  {"id":"gg_teddy","name":"ตุ๊กตาหมีขนนุ่ม","type":"gift","rarity":"Uncommon","icon":"🧸","desc":"ตุ๊กตาหมีน่ากอดอบอุ่น","weight":15},
+  {"id":"gg_diary","name":"สมุดบันทึกล็อคกุญแจ","type":"special","rarity":"Uncommon","icon":"📔","desc":"สมุดบันทึกความทรงจำลับเฉพาะสองเรา","weight":10},
+  {"id":"gg_perfume","name":"น้ำหอมกลิ่นดอกไม้ราตรี","type":"special","rarity":"Rare","icon":"🌸","desc":"น้ำหอมเสน่ห์ดึงดูด ชวนหลงใหลอย่างลึกซึ้ง","weight":8},
+  {"id":"gg_crystal_necklace","name":"สร้อยคอคริสตัลเงิน","type":"special","rarity":"Rare","icon":"💎","desc":"สร้อยคอเปล่งประกายงดงาม","weight":7},
+  {"id":"gg_star_ring","name":"แหวนสัญญาแห่งดวงดาว","type":"special","rarity":"SSR","icon":"💍","desc":"แหวนแห่งพันธสัญญาพิเศษ มอบให้เพื่อแทนใจนิรันดร์","weight":3},
+  {"id":"gg_satin_sleepwear","name":"ชุดนอนผ้าซาตินเย้ายวน","type":"special","rarity":"SSR","icon":"👗","desc":"ชุดนอนผ้าซาตินบางเบา เพิ่มความใกล้ชิดและความเสน่หาอย่างเร่าร้อน","weight":2}
+]

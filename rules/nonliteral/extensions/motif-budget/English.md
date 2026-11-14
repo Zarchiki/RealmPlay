@@ -1,0 +1,1 @@
+- Do not reuse a motif, object focus, gesture, or opening from the prior three replies unless the user directly asks about it.

@@ -147,6 +147,7 @@ def run_import():
                     "name": norm_prompt,
                     "prompt": norm_prompt,
                     "category": category_name,
+                    "slot": s,
                     "file": rel_path
                 })
             seen_prompts.add(norm_prompt.lower())

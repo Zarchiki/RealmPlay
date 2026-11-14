@@ -41,7 +41,7 @@
 - [ ] `สร้างรูป...` ต้อง trigger แบบ natural language
 - [ ] `/image ...` และ `[[image: ...]]` ต้อง trigger แบบ command
 - [ ] คำบรรยายธรรมดา เช่น “เดินเข้าห้อง” ต้องไม่ trigger ภาพ
-- [ ] รูปที่ได้สะท้อน subject, action, place/time, appearance, wardrobe และ emotion
+- [ ] รูปที่ได้สะท้อน subject, action, place/time, appearance, active outfit และ emotion
 - [ ] TTS อ่านเฉพาะ dialogue ตามตัวเลือก, replay ได้, RVC ใช้เมื่อเปิด
 - [ ] กด ■ ระหว่างสร้างภาพ: ComfyUI ต้องหยุดและ trace เป็น Cancelled
 

@@ -1,0 +1,11 @@
+[
+  {"id":"wg_denim_jacket","name":"แจ็กเก็ตเดนิมวินเทจ","type":"wearable","slot":"outer","prompt":"vintage denim jacket","category":"casual outerwear","rarity":"Common","icon":"🧥","desc":"แจ็กเก็ตเดนิมทรงพอดีตัวสำหรับลุคสบาย ๆ","weight":24},
+  {"id":"wg_oversized_hoodie","name":"ฮู้ดดี้โอเวอร์ไซซ์","type":"wearable","slot":"outer","prompt":"oversized cozy hoodie","category":"casual outerwear","rarity":"Common","icon":"🧢","desc":"ฮู้ดดี้นุ่ม ๆ สำหรับวันพักผ่อน","weight":24},
+  {"id":"wg_knit_top","name":"เสื้อไหมพรมคอเต่า","type":"wearable","slot":"top","prompt":"fitted ribbed turtleneck sweater","category":"tops","rarity":"Common","icon":"👚","desc":"เสื้อไหมพรมเรียบหรูใส่ง่าย","weight":22},
+  {"id":"wg_pleated_skirt","name":"กระโปรงพลีตคลาสสิก","type":"wearable","slot":"bottom","prompt":"classic pleated midi skirt","category":"bottoms","rarity":"Uncommon","icon":"👗","desc":"กระโปรงพลีตทรงคลาสสิก","weight":16},
+  {"id":"wg_leather_boots","name":"บูทหนังข้อสั้น","type":"wearable","slot":"shoes","prompt":"black leather ankle boots","category":"shoes","rarity":"Uncommon","icon":"🥾","desc":"บูทหนังสำหรับลุคมั่นใจ","weight":16},
+  {"id":"wg_silk_blouse","name":"เสื้อเบลาส์ผ้าไหม","type":"wearable","slot":"top","prompt":"elegant silk blouse","category":"tops","rarity":"Rare","icon":"✨","desc":"เบลาส์ผ้าไหมเนื้อดีสำหรับโอกาสพิเศษ","weight":8},
+  {"id":"wg_nightdress","name":"ชุดนอนซาติน","type":"wearable","slot":"top","prompt":"elegant satin nightdress","category":"sleepwear","rarity":"Rare","icon":"🌙","desc":"ชุดนอนซาตินเรียบหรู","weight":7},
+  {"id":"wg_star_pendant","name":"จี้ดาวเงิน","type":"wearable","slot":"neck_acc","prompt":"delicate silver star pendant necklace","category":"accessories","rarity":"Rare","icon":"📿","desc":"จี้เงินรูปดาวสำหรับสวมเป็นเครื่องประดับ","weight":6},
+  {"id":"wg_evening_gown","name":"ชุดราตรีกำมะหยี่","type":"wearable","slot":"preset","prompt":"elegant midnight velvet evening gown, matching heels","category":"full outfit","rarity":"SSR","icon":"💜","desc":"ชุดราตรีเต็มเซ็ตสำหรับค่ำคืนพิเศษ","weight":2}
+]

@@ -18,10 +18,10 @@ execution runs. Both endpoints require the same login token as the chat.
 | `expressive_vocalization` | LLM/TTS | Uses brief, character-appropriate interjections and vocal reactions only in fitting roleplay moments. |
 | `proactive_state` | LLM | Saves canonical state blocks without displaying them in chat. |
 | `image_trigger` | Image | Requires an explicit image request or image command. |
-| `image_context` | Image | Sends scene/action, appearance, wardrobe, emotion, selected context, and configured suffix. |
-| `wardrobe` | Image | Uses the active wardrobe selection. Automatic clothing changes are deliberately off. |
+| `image_context` | Image | Sends scene/action, appearance, active outfit, emotion, selected context, and configured suffix. |
+| `active_sd_prompt` | Image | Sends only the resolved active Stable Diffusion prompt. Inventory and removed clothing are excluded. |
 | `tts_dialogue` | TTS | Sends quoted dialogue, or supplied text when no dialogue exists. |
-| `nsfw` | Policy | Does not inject undisclosed censorship; local model, workflow, and configured prompts remain authoritative. |
+| `content_policy_local_model` | Policy | Keeps content handling under the selected local model/workflow policy; it is not an image-generation rule label. |
 
 ## Trace data
 
@@ -29,7 +29,7 @@ Each run has an ID, operation, phase, percentage, duration, active rules,
 captured prompt payload, and error detail. Console messages use this form:
 
 ```text
-[RealmPlay][image][a1b2c3d4] 55% ComfyUI: generating rules=image_context,wardrobe
+[RealmPlay][image][a1b2c3d4] 55% ComfyUI: generating rules=image_context,active_sd_prompt
 ```
 
 The persistent activity log is `logs/rule-activity.log`.
@@ -58,9 +58,10 @@ failure, so a failed ComfyUI/TTS call is visible without opening the console.
 
 Rule Inspector can change these global local-server settings: proactive state,
 loop/repetition guard, output prohibitions, explicit image trigger, automatic
-wardrobe, prompt-trace retention, and NSFW
-policy. The defaults preserve existing roleplay behaviour: proactive state and
-explicit image requests are on; auto wardrobe is off; NSFW mode is `local`.
+wardrobe, prompt-trace retention, and local-model content policy. The defaults
+preserve existing roleplay behaviour: proactive state and explicit image
+requests are on; auto wardrobe is off; the local-model policy remains
+authoritative.
 
 ### Loop and output boundaries
 
@@ -158,7 +159,7 @@ When auto wardrobe is enabled, the model may change clothing only by emitting:
 The server accepts only booleans for **existing** wardrobe slots. It cannot
 create a slot, inject a clothing prompt, or alter another user's wardrobe.
 
-NSFW policy is always visible in the assembled system instruction:
+Local-model content policy is visible in the assembled system instruction:
 
 - `local`: selected local model/workflow and visible prompts decide behaviour.
 - `fade_to_black`: keeps explicit acts non-graphic.
@@ -204,9 +205,9 @@ request. It classifies the incoming text and operation (`chat`, `image`, or
 
 | Node | Included when |
 | --- | --- |
-| Status, situation | Always for chat/image continuity. |
+| Status, situation | Always for chat/image continuity. Wardrobe is not embedded in `Current Situation`. |
 | Memory | Input refers to past events, relationships, promises, secrets, or memory. |
-| Appearance, wardrobe | An image or visual request needs it. |
+| Appearance, active outfit | An image or visual request needs it. Only currently worn items are eligible for the image prompt. |
 | Emotion | An emotional request or image needs expression continuity. |
 | Story time | A time/place request or image needs it. |
 
@@ -219,7 +220,7 @@ loading a large unfiltered context database into the model.
 
 Editable **Rule Instructions** use the same router. Core visible-reply rules
 (system instruction, Thai/English adaptation, self-recognition, writing style,
-loop guard, prohibitions, pronouns, and NSFW) are selected for chat. Other
+loop guard, prohibitions, pronouns, and local-model content policy) are selected for chat. Other
 instructions are added only when their matching context node or operation is
 selected:
 
@@ -228,8 +229,8 @@ selected:
 | Memory | Proactive state |
 | Emotion | Emotional clarity, expressive vocalization |
 | Story time | Time recognition |
-| Appearance or wardrobe | Image context, wardrobe |
-| Explicit image request / image operation | Image trigger, image context, wardrobe |
+| Appearance or active outfit | Image context, active SD prompt |
+| Explicit image request / image operation | Image trigger, image context, active SD prompt |
 | TTS operation | TTS dialogue |
 
 The `rule_router` trace lists selected rule IDs, reasons, and only the custom

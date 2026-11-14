@@ -8,11 +8,13 @@ from pathlib import Path
 import urllib.request
 import urllib.parse
 import urllib.error
-from comfy_workflows import build_default_workflow, compile_workflow
+import re
+from comfy_workflows import build_default_workflow, compile_workflow, extract_character_eye_tags
+from logic_set_engine import OrderedTagSet
 
 DEFAULT_COMFY_URL = 'http://127.0.0.1:8188'
 OUTPUT_DIR = 'generated_images'
-DEFAULT_CONTEXT_SOURCES = ('appearance', 'wardrobe', 'situation', 'memory', 'emotion')
+DEFAULT_CONTEXT_SOURCES = ('location', 'appearance', 'wardrobe', 'situation', 'memory', 'emotion')
 # rgthree Seed accepts an INT in [-2^50, 2^50]. Keep RealmPlay's global seed
 # inside that intersection so one custom workflow cannot reject an otherwise
 # valid KSampler seed.
@@ -85,7 +87,41 @@ EMOTION_ALIASES = {
     'flirtatious': 'flirty', 'desire': 'yearning', 'dominance': 'dominant', 'dom': 'dominant',
 }
 
-def resolve_emotion_prompt(emotion, custom=None):
+_CONFLICTING_EYE_COLOR_RE = re.compile(
+    r"\b(?:red|blue|green|brown|amber|hazel|yellow|golden|gold|purple|violet|pink|crimson|black|dark|grey|gray|silver|white|orange|aqua|cyan|turquoise|emerald|ruby|sapphire|heterochromia)\s+eyes\b",
+    re.IGNORECASE,
+)
+
+
+def _inject_appearance_eye_color(emotion_prompt, appearance=None):
+    """Ensure the emotion prompt sent to FaceDetailer carries the character's eye color from Appearance."""
+    base = str(emotion_prompt or '').strip()
+    eye_tags = extract_character_eye_tags(appearance) if appearance else []
+    if not eye_tags:
+        return base
+    # If the emotion describes closed eyes (e.g. sleeping, fainting, closed eyes), don't force open eye color tags
+    if re.search(r"\bclosed\s+eyes\b", base, re.IGNORECASE):
+        return base
+    parts = [p.strip() for p in base.split(',') if p.strip()]
+    eye_lower_set = {t.casefold() for t in eye_tags}
+    filtered_parts = []
+    for p in parts:
+        pl = p.casefold()
+        if pl in eye_lower_set:
+            continue
+        # Remove any hardcoded eye color in the emotion preset that conflicts with character appearance
+        if _CONFLICTING_EYE_COLOR_RE.search(p) and pl not in eye_lower_set:
+            p = _CONFLICTING_EYE_COLOR_RE.sub("", p).strip(" ,")
+            if not p:
+                continue
+        filtered_parts.append(p)
+    # Insert character eye color right after the first expression tag via OrderedTagSet Union
+    insert_pos = 1 if filtered_parts else 0
+    merged_set = OrderedTagSet(filtered_parts[:insert_pos]).union(eye_tags, filtered_parts[insert_pos:])
+    return merged_set.to_prompt()
+
+
+def resolve_emotion_prompt(emotion, custom=None, appearance=None):
     raw = str(emotion or 'neutral').strip().lower()
     # Strip intensity or cause if passed as a composite string (e.g. "hopeful (65%), cause: ...")
     raw = raw.split('(')[0].split(',')[0].strip()
@@ -97,29 +133,32 @@ def resolve_emotion_prompt(emotion, custom=None):
     
     # 1. Direct match in configured custom or default catalog
     if key in normalized:
-        return normalized[key]
+        return _inject_appearance_eye_color(normalized[key], appearance)
     if key in DEFAULT_EMOTION_PROMPTS:
-        return DEFAULT_EMOTION_PROMPTS[key]
+        return _inject_appearance_eye_color(DEFAULT_EMOTION_PROMPTS[key], appearance)
     
     # 2. Check parts if composite emotion (e.g., eager_anticipation -> anticipation -> excited / happy)
     parts = key.split('_')
     for part in parts:
         alias_part = EMOTION_ALIASES.get(part, part)
         if alias_part in normalized:
-            return normalized[alias_part]
+            return _inject_appearance_eye_color(normalized[alias_part], appearance)
         if alias_part in DEFAULT_EMOTION_PROMPTS:
-            return DEFAULT_EMOTION_PROMPTS[alias_part]
+            return _inject_appearance_eye_color(DEFAULT_EMOTION_PROMPTS[alias_part], appearance)
 
     # 3. Known fallbacks for anticipation/eager/devotion
     if any(p in key for p in ('anticipat', 'eager', 'expect')):
-        return normalized.get('excited') or DEFAULT_EMOTION_PROMPTS.get('excited') or 'excited expression, bright wide eyes, eager smile'
+        res = normalized.get('excited') or DEFAULT_EMOTION_PROMPTS.get('excited') or 'excited expression, bright wide eyes, eager smile'
+        return _inject_appearance_eye_color(res, appearance)
     if 'devot' in key or 'seren' in key:
-        return normalized.get('gentle') or DEFAULT_EMOTION_PROMPTS.get('gentle') or 'soft happy expression, gentle smile, relaxed eyes, warm gaze, natural blush'
+        res = normalized.get('gentle') or DEFAULT_EMOTION_PROMPTS.get('gentle') or 'soft happy expression, gentle smile, relaxed eyes, warm gaze, natural blush'
+        return _inject_appearance_eye_color(res, appearance)
     if 'resist' in key or 'conflict' in key:
-        return normalized.get('uneasy') or DEFAULT_EMOTION_PROMPTS.get('uneasy') or 'uneasy expression, cautious eyes, tense brow, restrained breath'
+        res = normalized.get('uneasy') or DEFAULT_EMOTION_PROMPTS.get('uneasy') or 'uneasy expression, cautious eyes, tense brow, restrained breath'
+        return _inject_appearance_eye_color(res, appearance)
 
     # 4. Fallback: return descriptive prompt instead of bare unrendered keyword
-    return f"{raw.replace('_', ' ')} expression, detailed face, expressive eyes"
+    return _inject_appearance_eye_color(f"{raw.replace('_', ' ')} expression, detailed face, expressive eyes", appearance)
 
 def request_json(path, address, payload=None):
     data = json.dumps(payload).encode() if payload is not None else None
@@ -228,15 +267,46 @@ def preferred_image_outputs(history_entry, compiled_graph):
             yield image
 
 def build_positive_prompt_parts(base_prompt, context=None, sources=None):
-    """Compose the exact POSITIVE wildcard text ensuring Action Seed always takes top priority."""
+    """Compose the exact POSITIVE wildcard text ensuring Location prefix and Action Seed take priority."""
     context = context or {}
     enabled = set(sources or DEFAULT_CONTEXT_SOURCES)
     parts = []
 
-    # 1. Action & Dynamic Posture (Priority #1: Placed at the very front for maximum Attention)
+    h_mode_active = bool(context.get("h_mode_active") or context.get("h_mode"))
+    # `naked` is a state tag, not a garment.  Keep it immediately after the
+    # H-Mode NSFW prefix so the visual model sees the exposure state before
+    # action, appearance, or any remaining active accessories.
+    wardrobe_val = str(context.get("wardrobe") or "").strip()
+    wardrobe_tags = [tag.strip() for tag in wardrobe_val.split(",") if tag.strip()]
+    naked_active = any(tag.casefold() == "naked" for tag in wardrobe_tags)
+    wardrobe_without_naked = ", ".join(
+        tag for tag in wardrobe_tags if tag.casefold() != "naked"
+    )
+    if h_mode_active:
+        parts.append("POV, NSFW")
+        if "wardrobe" in enabled and naked_active:
+            parts.append("naked")
+
+    if context.get("precomposed_positive"):
+        action_seed = str(base_prompt or "").strip()
+        if action_seed:
+            parts.append(action_seed)
+        return list(dict.fromkeys(part for part in parts if part))
+
+    # 0. Location Prefix (Always prefix location earliest before all other positive prompt elements)
+    loc_val = str(context.get("location") or "").strip()
+    if loc_val:
+        parts.append(loc_val)
+
+    # 1. Action & Dynamic Posture (Priority #1: Placed immediately after location prefix)
     action_seed = str(base_prompt or "").strip()
     if action_seed:
-        parts.append(action_seed)
+        if loc_val and action_seed.lower().startswith(loc_val.lower()):
+            trimmed_action = action_seed[len(loc_val):].lstrip(" ,.-").strip()
+            if trimmed_action:
+                parts.append(trimmed_action)
+        else:
+            parts.append(action_seed)
 
     # 2. Appearance (Subject Identity, Hair, Eyes)
     if "appearance" in enabled and context.get("appearance"):
@@ -245,8 +315,11 @@ def build_positive_prompt_parts(base_prompt, context=None, sources=None):
             parts.append(val)
 
     # 3. Wardrobe (Clothing / Naked status)
-    if "wardrobe" in enabled and context.get("wardrobe"):
-        val = str(context["wardrobe"]).strip()
+    if "wardrobe" in enabled and wardrobe_val:
+        # In H-Mode, naked was intentionally emitted next to NSFW above.
+        # Keep all still-active accessories and other tags in their normal
+        # wardrobe position without duplicating the exposure tag.
+        val = wardrobe_without_naked if h_mode_active and naked_active else wardrobe_val
         if val:
             parts.append(val)
 
@@ -262,11 +335,17 @@ def build_positive_prompt_parts(base_prompt, context=None, sources=None):
         if val:
             parts.append(val)
 
+    # 6. Terminal Gesture / Posture (H-Mode exhaustion)
+    if context.get("terminal_gesture"):
+        val = str(context["terminal_gesture"]).strip()
+        if val:
+            parts.append(val)
+
     return list(dict.fromkeys(part for part in parts if part))
 
 
 async def generate_character_image(positive_prompt, negative_prompt='', server_address=None,
-        width=None, height=None, steps=None, cfg=None, sampler=None, context=None, progress=None, cancelled=None):
+        width=None, height=None, steps=None, cfg=None, sampler=None, context=None, progress=None, cancelled=None, timeout=None):
     settings = json.loads(Path('config.json').read_text(encoding='utf-8')).get('comfy',{})
     address = server_address or settings.get('address',DEFAULT_COMFY_URL)
     context = context or {}
@@ -277,13 +356,15 @@ async def generate_character_image(positive_prompt, negative_prompt='', server_a
     seed = secrets.randbelow(SEED_MAX + 1) if requested_seed < 0 else requested_seed % (SEED_MAX + 1)
     values = dict(settings.get('placeholders',{}))
     requested_emotion = context.get('emotion') or settings.get('emotion', 'neutral')
-    values.update(prompt=', '.join(parts), negative_prompt=negative_prompt or settings.get('negative_prompt',''),
-        suffix=settings.get('prompt_suffix',''), emotion=resolve_emotion_prompt(requested_emotion, settings.get('emotion_prompts')) if 'emotion' in sources else '',
+    values.update(prompt=', '.join(parts), appearance=str(context.get('appearance') or '').strip(),
+        negative_prompt=negative_prompt or settings.get('negative_prompt',''),
+        suffix=settings.get('prompt_suffix',''), emotion=resolve_emotion_prompt(requested_emotion, settings.get('emotion_prompts'), appearance=context.get('appearance')) if 'emotion' in sources else '',
         width=width or settings.get('width',576), height=height or settings.get('height',1024),
         steps=steps or settings.get('steps',25), cfg=cfg if cfg is not None else settings.get('cfg',7),
         sampler=sampler or settings.get('sampler','euler'), scheduler=settings.get('scheduler','normal'),
         seed=seed, denoise=settings.get('denoise',1),
         model='', checkpoint='', vae=settings.get('vae',''), clip=settings.get('clip',''),
+        sam_model=settings.get('sam_model', ''),
         clip_skip=-abs(int(settings.get('clip_skip',1))))
     values['checkpoint'] = await asyncio.to_thread(resolve_checkpoint, settings, address)
     values['model'] = values['checkpoint']
@@ -304,7 +385,8 @@ async def generate_character_image(positive_prompt, negative_prompt='', server_a
     prompt_id = await asyncio.to_thread(queue_prompt,compiled,address)
     if progress:
         progress('ComfyUI: queued', 30, {'prompt_id': prompt_id})
-    deadline = time.monotonic()+max(15,min(1800,float(settings.get('timeout',300))))
+    effective_timeout = float(timeout) if timeout is not None else float(settings.get('timeout', 300))
+    deadline = time.monotonic()+max(15,min(1800,effective_timeout))
     while time.monotonic()<deadline:
         await asyncio.sleep(1)
         if cancelled and cancelled():

@@ -168,10 +168,7 @@
   },
   "16": {
     "inputs": {
-      "modelname": [
-        "20",
-        0
-      ],
+      "modelname": "%checkpoint%",
       "positive": [
         "9",
         0
@@ -438,8 +435,8 @@
   },
   "33": {
     "inputs": {
-      "wildcard_text": "confused_desire",
-      "populated_text": "confused_desire",
+      "wildcard_text": "%emotion%",
+      "populated_text": "",
       "mode": "populate",
       "seed": 927752796431240,
       "Select to add Wildcard": "Select the Wildcard to add to the text"
@@ -463,7 +460,7 @@
         "33",
         0
       ],
-      "delimiter": ""
+      "delimiter": ", "
     },
     "class_type": "StringConcatenate",
     "_meta": {
@@ -480,8 +477,8 @@
         "33",
         0
       ],
-      "string_b": "Executional extreme detailed face, very high detailed facial features, detailed irises, detailed pupils",
-      "delimiter": ""
+      "string_b": "extreme detailed face, very high detailed facial features, detailed irises, detailed pupils",
+      "delimiter": ", "
     },
     "class_type": "StringConcatenate",
     "_meta": {
@@ -539,7 +536,7 @@
         "39",
         0
       ],
-      "delimiter": ""
+      "delimiter": ", "
     },
     "class_type": "StringConcatenate",
     "_meta": {
@@ -552,24 +549,24 @@
   },
   "45": {
     "inputs": {
-      "guide_size": 384,
+      "guide_size": 768,
       "guide_size_for": true,
       "max_size": 1024,
       "seed": 520882496911463,
       "steps": 24,
-      "cfg": 8,
+      "cfg": 7,
       "sampler_name": "euler_ancestral",
-      "scheduler": "simple",
-      "denoise": 0.33,
-      "feather": 12,
+      "scheduler": "normal",
+      "denoise": 0.28,
+      "feather": 3,
       "noise_mask": true,
       "force_inpaint": true,
       "bbox_threshold": 0.8,
-      "bbox_dilation": 12,
-      "bbox_crop_factor": 1.2,
+      "bbox_dilation": 15,
+      "bbox_crop_factor": 1.15,
       "sam_detection_hint": "center-1",
-      "sam_dilation": 15,
-      "sam_threshold": 0.8,
+      "sam_dilation": 1,
+      "sam_threshold": 0.9,
       "sam_bbox_expansion": 0,
       "sam_mask_hint_threshold": 0.7,
       "sam_mask_hint_use_negative": "False",

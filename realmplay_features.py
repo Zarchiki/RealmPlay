@@ -9,6 +9,7 @@ import shutil
 import threading
 import uuid
 from datetime import datetime, timezone
+from functools import wraps
 from pathlib import Path
 from fastapi import Depends, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
@@ -17,6 +18,7 @@ from comfy_workflows import validate_workflow
 from card_v2 import normalize_card, merge_card_data, read_legacy_card
 import auth
 import sampling
+import state_index
 from observability import DEFAULT_RULE_SETTINGS, RULES
 
 lock = threading.RLock()
@@ -64,13 +66,22 @@ def _active_wardrobe_prompt(outfits):
     """Collect selected wardrobe tags without forcing Naked when no outfit was selected."""
     if not isinstance(outfits, dict):
         return ''
+    try:
+        from app.services.wardrobe_prompt import compose_slot_prompt
+    except ImportError:
+        compose_slot_prompt = lambda item: str(item.get('prompt', '')).strip()
+
+    inner_keys = ('top_inner', 'bra', 'bottom_inner', 'panties')
     tags = []
+    inner_tags = []
     for key, value in outfits.items():
         if isinstance(value, dict) and value.get('active') and str(value.get('prompt', '')).strip():
-            tags.append(str(value['prompt']).strip())
+            target_list = inner_tags if key in inner_keys else tags
+            target_list.append(compose_slot_prompt(value))
         elif isinstance(value, str) and value.strip() and key not in ('current_outfit', 'outfits'):
-            tags.append(value.strip())
-    return ', '.join(dict.fromkeys(tags))
+            target_list = inner_tags if key in inner_keys else tags
+            target_list.append(value.strip())
+    return ', '.join(dict.fromkeys(tags + inner_tags))
 
 
 def chat_style_defaults():
@@ -129,10 +140,16 @@ def card_document(name, cards):
         try: old = cards.parse_png_card(str(path.parent / 'avatar.png'))
         except (ValueError, OSError): pass
     old = read_legacy_card(old or {'name': name})
+    raw_avatar = old.get('avatar')
+    if not raw_avatar or str(raw_avatar).strip().lower() == 'none':
+        raw_avatar = baseline.get('image_appearance') or 'none'
+
     defaults = dict(name=name, description=baseline['persona'], personality=baseline['personality'],
                     scenario=baseline['scenario'], first_mes=baseline['first_mes'], mes_example='',
-                    creatorcomment='', avatar='none', talkativeness=0.5, fav=False, tags=[])
+                    creatorcomment='', avatar=raw_avatar, talkativeness=0.5, fav=False, tags=[])
     defaults.update(old)
+    if not defaults.get('avatar') or str(defaults.get('avatar')).strip().lower() == 'none':
+        defaults['avatar'] = baseline.get('image_appearance') or 'none'
     defaults.update(description=baseline['persona'], personality=baseline['personality'],
                     scenario=baseline['scenario'], first_mes=baseline['first_mes'])
     ordered = {k: defaults[k] for k in FIELDS}
@@ -141,6 +158,14 @@ def card_document(name, cards):
 
 
 def install(app, current_user, cards, engine, safe_name):
+    lock = getattr(cards, "STATE_LOCK", threading.RLock())
+
+    def _session_locked(function):
+        @wraps(function)
+        def locked(*args, **kwargs):
+            with lock:
+                return function(*args, **kwargs)
+        return locked
     def chat_settings_path(user):
         return Path('users') / safe_name(user) / 'settings.json'
 
@@ -148,6 +173,9 @@ def install(app, current_user, cards, engine, safe_name):
         root = Path("users") / safe_name(user) / safe_name(char_name)
         directory = root / "chat_sessions"
         return root, directory, directory / "index.json"
+
+    def _session_state_dir(directory, session_id):
+        return directory / str(session_id)
 
     def _now():
         return datetime.now(timezone.utc).isoformat()
@@ -168,7 +196,9 @@ def install(app, current_user, cards, engine, safe_name):
                 session_id = uuid.uuid4().hex
                 now = _now()
                 payload = {"id": session_id, "title": "แชทเดิม", "created_at": now, "updated_at": now,
-                           "history": state.get("history", []), "memory": state.get("memory", "")}
+                           "history": state.get("history", []), "memory": state.get("memory", ""),
+                           "scene_state": state.get("scene_state", {}),
+                           "normal_scene_state": state.get("normal_scene_state", {})}
                 _write_json(directory / f"{session_id}.json", payload)
                 index = {"active_id": session_id, "sessions": [{
                     "id": session_id, "title": payload["title"], "created_at": now,
@@ -180,18 +210,33 @@ def install(app, current_user, cards, engine, safe_name):
     def _sync_active_session(user, char_name, index=None):
         index = index or _ensure_sessions(user, char_name)
         active_id = index.get("active_id")
-        if not active_id:
+        if not active_id or not re.fullmatch(r"[a-f0-9]{32}", str(active_id)):
             return index
         state = cards.get_user_character_state(user, safe_name(char_name))
-        _, directory, index_path = _session_paths(user, char_name)
+        root, directory, index_path = _session_paths(user, char_name)
         path = directory / f"{active_id}.json"
         old = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         now = _now()
         payload = {**old, "id": active_id, "title": old.get("title", "Chat"),
                    "created_at": old.get("created_at", now), "updated_at": now,
-                   "history": state.get("history", []), "memory": state.get("memory", "")}
+                   "history": state.get("history", []), "memory": state.get("memory", ""),
+                   "status": state.get("status", ""), "scenario": state.get("scenario", ""),
+                   "emotion": state.get("emotion", "neutral"),
+                   "emotion_detail": state.get("emotion_detail", {}),
+                   "outfits": state.get("outfits", {}),
+                   "inventory_wardrobe": state.get("inventory_wardrobe", []),
+                   "scene_state": state.get("scene_state", {}),
+                   "arousal_state": state.get("arousal_state", {}),
+                   "inventory": state.get("inventory", []),
+                   "pending_user_request": state.get("pending_user_request"),
+                   "needs_state": state.get("needs_state", {}),
+                   "character_intent": state.get("character_intent", {}),
+                   "normal_scene_state": state.get("normal_scene_state", {})}
         with lock:
             _write_json(path, payload)
+            # Session SQLite is the durable source; root profile SQLite is the
+            # active-session working copy used by the chat pipeline.
+            state_index.clone_profile(root, _session_state_dir(directory, active_id))
             for item in index.get("sessions", []):
                 if item.get("id") == active_id:
                     item.update(title=payload["title"], updated_at=now,
@@ -200,34 +245,96 @@ def install(app, current_user, cards, engine, safe_name):
         return index
 
     @app.get("/api/characters/{char_name}/chat-sessions")
+    @_session_locked
     def list_chat_sessions(char_name: str, user=Depends(current_user)):
         index = _sync_active_session(user, char_name)
         return index
 
     @app.post("/api/characters/{char_name}/chat-sessions")
+    @_session_locked
     def create_chat_session(char_name: str, body: dict, user=Depends(current_user)):
         index = _sync_active_session(user, char_name)
+        root, directory, index_path = _session_paths(user, char_name)
         state = cards.get_user_character_state(user, safe_name(char_name))
         session_id = uuid.uuid4().hex
         now = _now()
         title = str(body.get("title") or f"Chat {len(index.get('sessions', [])) + 1}").strip()[:80]
-        memory_mode = body.get("memory_mode", "copy")
-        if memory_mode not in ("copy", "blank"):
-            raise HTTPException(422, "memory_mode must be copy or blank")
-        memory = state.get("memory", "") if memory_mode == "copy" else ""
-        first = state.get("baseline", {}).get("first_mes", "")
+        # `source_session_id` is the full state source.  Keep the former
+        # memory_mode as a compatibility alias: copy -> current active session,
+        # blank -> Character Card default SQLite.
+        source_session_id = str(body.get("source_session_id") or "").strip()
+        memory_mode = body.get("memory_mode", "")
+        if not source_session_id:
+            source_session_id = str(index.get("active_id") or "") if memory_mode == "copy" else "default"
+        copy_history = bool(body.get("copy_history", False))
+        # A new session is fresh by default.  Selecting a source only becomes
+        # meaningful when the user explicitly copies that session's history
+        # and its complete runtime state together.
+        if not copy_history:
+            source_session_id = "default"
+        if source_session_id != "default" and not re.fullmatch(r"[a-f0-9]{32}", source_session_id):
+            raise HTTPException(422, "Invalid source session")
+        baseline = state.get("baseline", {})
+        first = baseline.get("first_mes", "")
         greeting_index = body.get('greeting_index', -1)
-        greetings = state.get('baseline', {}).get('card_data', {}).get('alternate_greetings', [])
+        greetings = baseline.get('card_data', {}).get('alternate_greetings', [])
         if isinstance(greeting_index, bool) or not isinstance(greeting_index, int) or greeting_index < -1 or greeting_index >= len(greetings):
             raise HTTPException(422, 'Invalid alternate greeting index')
         if greeting_index >= 0:
             first = greetings[greeting_index]
         profile = auth.get_user_profile(user)
-        first = first.replace('{{char}}', state['baseline'].get('card_data', {}).get('name', char_name)).replace('{{user}}', profile.get('display_name') or user)
-        history = [{"role": "assistant", "content": first, "is_first_message": True}] if first else []
+        user_disp = (profile.get('display_name') or "").strip()
+        char_disp = baseline.get('card_data', {}).get('name', char_name)
+        if user_disp:
+            first = first.replace('{{char}}', char_disp).replace('{{user}}', user_disp)
+            base_scenario = (baseline.get("scenario") or "").replace('{{char}}', char_disp).replace('{{user}}', user_disp)
+        else:
+            first_clean = re.sub(r'([พี่น้องคุณท่าน])\s*\{\{user\}\}', r'\1', first)
+            first = first_clean.replace('{{char}}', char_disp).replace('{{user}}', '')
+            scen_clean = re.sub(r'([พี่น้องคุณท่าน])\s*\{\{user\}\}', r'\1', (baseline.get("scenario") or ""))
+            base_scenario = scen_clean.replace('{{char}}', char_disp).replace('{{user}}', '')
+        base_status = "[Posture & Activity]\n- Posture: (Normal)\n- Location: (Default scene)\n\n[Vital Needs & Biorhythm]\n- Energy: (Normal)\n- Hunger: (Normal)\n- Arousal: (Calm)"
+        base_outfits = cards.default_character_outfits()
+        default_runtime = {
+            "memory": "", "status": base_status, "scenario": base_scenario,
+            "emotion": "neutral", "emotion_detail": {"name": "neutral", "intensity": 50, "cause": "new session"},
+            "outfits": base_outfits, "inventory": [], "inventory_wardrobe": [],
+            "scene_state": {"stage": "normal", "climax_loops": 0},
+            "arousal_state": {"final": 0, "level": "None", "h_energy": 3, "exhausted": False},
+            "pending_user_request": None, "needs_state": {}, "character_intent": {},
+            "normal_scene_state": {"stage": "resting"},
+        }
+        source_payload = {}
+        if source_session_id == "default":
+            # Start from the Character Card's default SQLite, then apply the
+            # user-facing default scenario/greeting for this new session.
+            default_dir = Path("characters") / safe_name(char_name)
+            default_profile = state_index.load_profile(default_dir)
+            if default_profile:
+                state_index.clone_profile(default_dir, root)
+                default_runtime.update({key: default_profile[key] for key in default_runtime if key in default_profile})
+            default_runtime["memory"] = ""
+            default_runtime["scenario"] = base_scenario
+        else:
+            source_path = directory / f"{source_session_id}.json"
+            if not source_path.is_file():
+                raise HTTPException(404, "Source session not found")
+            source_payload = json.loads(source_path.read_text(encoding="utf-8"))
+            source_dir = _session_state_dir(directory, source_session_id)
+            if (source_dir / state_index.PROFILE_DB_NAME).is_file() and state_index.load_profile(source_dir):
+                state_index.clone_profile(source_dir, root)
+                state = cards.get_user_character_state(user, safe_name(char_name))
+                default_runtime.update({key: state.get(key) for key in default_runtime if key in state})
+            else:
+                default_runtime.update({key: source_payload[key] for key in default_runtime if key in source_payload})
+            if copy_history:
+                history = source_payload.get("history", [])
+            else:
+                history = [{"role": "assistant", "content": first, "is_first_message": True}] if first else []
+        if source_session_id == "default":
+            history = [{"role": "assistant", "content": first, "is_first_message": True}] if first else []
         payload = {"id": session_id, "title": title, "created_at": now, "updated_at": now,
-                   "history": history, "memory": memory}
-        _, directory, index_path = _session_paths(user, char_name)
+                   "history": history, **default_runtime}
         index.setdefault("sessions", []).insert(0, {
             "id": session_id, "title": title, "created_at": now, "updated_at": now,
             "message_count": len(history)
@@ -236,10 +343,12 @@ def install(app, current_user, cards, engine, safe_name):
         with lock:
             _write_json(directory / f"{session_id}.json", payload)
             _write_json(index_path, index)
-            cards.save_user_character_state(user, safe_name(char_name), {"history": history, "memory": memory})
-        return {"ok": True, **index, "history": history, "memory": memory}
+            cards.save_user_character_state(user, safe_name(char_name), {"history": history, **default_runtime})
+            state_index.clone_profile(root, _session_state_dir(directory, session_id))
+        return {"ok": True, **index, "history": history, "memory": default_runtime["memory"]}
 
     @app.post("/api/characters/{char_name}/chat-sessions/{session_id}/activate")
+    @_session_locked
     def activate_chat_session(char_name: str, session_id: str, user=Depends(current_user)):
         index = _sync_active_session(user, char_name)
         if not re.fullmatch(r"[a-f0-9]{32}", session_id):
@@ -250,17 +359,36 @@ def install(app, current_user, cards, engine, safe_name):
             raise HTTPException(404, "Session not found")
         payload = json.loads(path.read_text(encoding="utf-8"))
         index["active_id"] = session_id
+        root, directory, index_path = _session_paths(user, char_name)
+        session_state_dir = _session_state_dir(directory, session_id)
+        session_db = session_state_dir / state_index.PROFILE_DB_NAME
+        session_profile_state = state_index.load_profile(session_state_dir) if session_db.is_file() else {}
+        if session_profile_state:
+            state_index.clone_profile(session_state_dir, root)
+            # SQLite restores all runtime state. History and this legacy
+            # normal-scene field remain session JSON data.
+            restore_state = {
+                "history": payload.get("history", []),
+                "normal_scene_state": payload.get("normal_scene_state", {}),
+            }
+        else:
+            # One-time fallback for sessions created before session SQLite.
+            restore_state = {"history": payload.get("history", []), "memory": payload.get("memory", "")}
+            for k in ("status", "scenario", "emotion", "emotion_detail", "outfits", "scene_state", "arousal_state", "inventory", "inventory_wardrobe", "pending_user_request", "needs_state", "character_intent", "normal_scene_state"):
+                if k in payload:
+                    restore_state[k] = payload[k]
         with lock:
             _write_json(index_path, index)
-            cards.save_user_character_state(user, safe_name(char_name), {
-                "history": payload.get("history", []), "memory": payload.get("memory", "")
-            })
+            cards.save_user_character_state(user, safe_name(char_name), restore_state)
         return {"ok": True, "history": payload.get("history", []),
                 "memory": payload.get("memory", ""), "active_id": session_id}
 
     @app.delete("/api/characters/{char_name}/chat-sessions/{session_id}")
+    @_session_locked
     def delete_chat_session(char_name: str, session_id: str, user=Depends(current_user)):
         index = _sync_active_session(user, char_name)
+        if not re.fullmatch(r"[a-f0-9]{32}", session_id):
+            raise HTTPException(404, "Session not found")
         if session_id == index.get("active_id"):
             raise HTTPException(409, "ไม่สามารถลบแชทที่กำลังใช้งาน")
         _, directory, index_path = _session_paths(user, char_name)
@@ -269,6 +397,9 @@ def install(app, current_user, cards, engine, safe_name):
         with lock:
             if path.is_file():
                 path.unlink()
+            session_state_dir = _session_state_dir(directory, session_id)
+            if session_state_dir.is_dir():
+                shutil.rmtree(session_state_dir)
             _write_json(index_path, index)
         return {"ok": True, **index}
 
@@ -414,7 +545,12 @@ def install(app, current_user, cards, engine, safe_name):
     @app.get('/api/chat-display/settings')
     def get_chat_display_settings(character_name: str = '', user=Depends(current_user)):
         settings = bubble_settings(user)
-        character = safe_name(character_name) if character_name else ''
+        if not character_name:
+            return {
+                'user': settings['user'],
+                'characters': settings.get('characters', {}),
+            }
+        character = safe_name(character_name)
         return {
             'user': settings['user'],
             'character': settings['characters'].get(character, {'scale': 1.0, 'x': 0, 'y': 0}),
@@ -460,7 +596,12 @@ def install(app, current_user, cards, engine, safe_name):
     def get_character_bubble_image(name: str, user=Depends(current_user)):
         path = bubble_image_path(user, 'character', name)
         if not path.is_file(): raise HTTPException(404, 'Bubble image not found')
-        return FileResponse(path, media_type='image/png', headers={'Cache-Control': 'no-store'})
+        mtime = int(path.stat().st_mtime)
+        return FileResponse(
+            path,
+            media_type='image/png',
+            headers={'Cache-Control': 'private, no-cache', 'ETag': f'"{safe_name(name)}-{mtime}"'}
+        )
 
     @app.post('/api/chat-display/characters/{name}/image')
     async def put_character_bubble_image(name: str, file: UploadFile = File(...), user=Depends(current_user)):
@@ -533,14 +674,10 @@ def install(app, current_user, cards, engine, safe_name):
     def character_profile_path(user, name):
         name = safe_name(name)
         card_document(name, cards)
-        path = Path('users') / safe_name(user) / name / 'profile_image.png'
-        # Preserve an older shared portrait once for each player, then keep
-        # the portrait independent just like appearance and wardrobe state.
-        legacy = Path('characters') / name / 'profile_image.png'
-        if not path.exists() and legacy.is_file():
-            path.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(legacy, path)
-        return path
+        # One shared portrait is the character-card image, right profile image,
+        # character list image, and chat avatar.  Keeping one source prevents
+        # the same character from appearing as different people across panes.
+        return Path('characters') / name / 'avatar.png'
 
     @app.get('/api/characters/{name}/profile-image')
     def get_character_profile_image(name: str, user=Depends(current_user)):
@@ -605,16 +742,31 @@ def install(app, current_user, cards, engine, safe_name):
         return {**{k: cfg.get(k, {}) for k in ('llm', 'comfy')},
                 'rules': {**DEFAULT_RULE_SETTINGS, **cfg.get('rules', {})},
                 'proactive': cfg.get('proactive', {}),
-                'rule_overrides': cfg.get('rule_overrides', {})}
+                'rule_overrides': cfg.get('rule_overrides', {}),
+                'rule_priority': cfg.get('rule_priority', [])}
 
     @app.post('/api/configuration')
     def write_configuration(body: dict, user=Depends(current_user)):
         with lock:
             cfg = config()
+            if 'rule_priority' in body:
+                priority = body['rule_priority']
+                essential = {
+                    'system_instruction', 'language_adaptation', 'self_recognition',
+                    'content_policy_local_model', 'prohibitions', 'proactive_state',
+                }
+                if (
+                    not isinstance(priority, list)
+                    or any(not isinstance(rule, str) for rule in priority)
+                    or len(priority) != len(set(priority))
+                    or any(rule not in RULES or rule in essential for rule in priority)
+                ):
+                    raise HTTPException(422, 'Invalid rule priority')
+                cfg['rule_priority'] = priority
             for section, allowed in {
                 'llm': {'model','mmproj','auto_load','context','gpu_layers','threads','batch_size','cache_type_k','cache_type_v','temperature','top_p','top_k','top_a','repetition_penalty','max_tokens'},
-                'comfy': {'enabled','address','workflow','mappings','placeholders','sources','negative_prompt','prompt_suffix','emotion','emotion_prompts','checkpoint','vae','clip','sampler','scheduler','width','height','steps','cfg','seed','denoise','clip_skip','timeout','presets'},
-                'rules': {'proactive_state','proactive_auto_reply','image_trigger','auto_wardrobe','loop_guard','prohibitions','expressive_vocalization','nsfw_mode','trace_prompts'},
+                'comfy': {'enabled','address','workflow','mappings','placeholders','sources','negative_prompt','prompt_suffix','emotion','emotion_prompts','emotion_categories','checkpoint','vae','clip','sampler','scheduler','sam_model','width','height','steps','cfg','seed','denoise','clip_skip','timeout','presets','rules'},
+                'rules': {'proactive_state','proactive_auto_reply','image_trigger','auto_wardrobe','loop_guard','prohibitions','expressive_vocalization','nsfw_mode','trace_prompts','thinking_mode','cnc_roleplay_enabled'},
                 'proactive': {'enabled','min_interval_seconds','max_interval_seconds','max_consecutive','presence_ttl_seconds'},
                 'rule_overrides': set(DEFAULT_RULE_SETTINGS) | set(RULES)
             }.items():
@@ -640,8 +792,10 @@ def install(app, current_user, cards, engine, safe_name):
             if not isinstance(cfg['llm'].get('auto_load', False), bool):
                 raise HTTPException(422, 'auto_load must be boolean')
             rules = {**DEFAULT_RULE_SETTINGS, **cfg.get('rules', {})}
-            if any(not isinstance(rules[key], bool) for key in ('proactive_state','proactive_auto_reply','image_trigger','auto_wardrobe','loop_guard','prohibitions','expressive_vocalization','trace_prompts')):
+            if any(not isinstance(rules[key], bool) for key in ('proactive_state','proactive_auto_reply','image_trigger','auto_wardrobe','loop_guard','prohibitions','expressive_vocalization','trace_prompts','thinking_mode','cnc_roleplay_enabled')):
                 raise HTTPException(422, 'Rule toggles must be boolean')
+            if rules['nsfw_mode'] in ('h_mode', 'h-mode', 'h'):
+                rules['nsfw_mode'] = 'local'
             if rules['nsfw_mode'] not in ('local', 'fade_to_black', 'block'):
                 raise HTTPException(422, 'Invalid NSFW policy mode')
             rules['proactive_state'] = True
@@ -652,7 +806,7 @@ def install(app, current_user, cards, engine, safe_name):
             for key, bounds in {
                 'min_interval_seconds': (30, 86400),
                 'max_interval_seconds': (30, 86400),
-                'max_consecutive': (1, 20),
+                'max_consecutive': (1, 2),
                 'presence_ttl_seconds': (30, 3600),
             }.items():
                 value = proactive.get(key)
@@ -676,7 +830,7 @@ def install(app, current_user, cards, engine, safe_name):
             if not all(isinstance(v,list) and all(isinstance(t,str) and '.' in t for t in v) for v in comfy.get('mappings',{}).values()):
                 raise HTTPException(422,'Mappings must contain lists of node.input targets')
             sources=comfy.get('sources',[])
-            if not isinstance(sources,list) or any(k not in ('appearance','wardrobe','situation','memory','emotion') for k in sources):
+            if not isinstance(sources,list) or any(k not in ('location','appearance','wardrobe','situation','memory','emotion') for k in sources):
                 raise HTTPException(422,'Invalid prompt sources')
             save_config(cfg)
         return {'ok': True}
@@ -930,8 +1084,12 @@ def install(app, current_user, cards, engine, safe_name):
             # CLIP choices from CLIPLoader
             raw_clips = choices('CLIPLoader', 'clip_name')
             clip_options = ['(Automatic / From Workflow)'] + [c for c in raw_clips if c != '(Automatic / From Workflow)']
+            # SAM model choices for FaceDetailer
+            raw_sams = choices('SAMLoader', 'model_name')
+            sam_options = ['(Automatic / From Workflow)'] + [s for s in raw_sams if s != '(Automatic / From Workflow)']
             return {'checkpoint': all_models, 'vae': vae_options, 'clip': clip_options,
-                    'sampler': choices('KSampler', 'sampler_name'), 'scheduler': choices('KSampler', 'scheduler')}
+                    'sampler': choices('KSampler', 'sampler_name'), 'scheduler': choices('KSampler', 'scheduler'),
+                    'sam_model': sam_options}
         except Exception as exc: raise HTTPException(502, str(exc))
 
     @app.get('/api/characters/{name}/card-document')

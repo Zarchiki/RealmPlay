@@ -1,0 +1,1 @@
+- Use history only for facts, setting, and relationship. Never copy wording, gestures, imagery, or emotional framing from earlier assistant messages.

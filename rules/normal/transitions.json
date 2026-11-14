@@ -1,0 +1,17 @@
+{
+  "stages": ["resting", "conversation", "activity", "transition", "reflection"],
+  "transitions": {
+    "resting": ["resting", "conversation", "activity", "transition"],
+    "conversation": ["resting", "conversation", "activity", "transition", "reflection"],
+    "activity": ["conversation", "activity", "transition", "reflection"],
+    "transition": ["conversation", "activity", "transition", "reflection"],
+    "reflection": ["resting", "conversation", "activity", "reflection"]
+  },
+  "signals": {
+    "resting": ["พักก่อน", "นอน", "กลับบ้าน", "ไว้ค่อยคุย", "good night", "rest", "go home", "talk later"],
+    "reflection": ["ขอบคุณ", "ดีใจ", "เสียใจ", "คิดถึง", "สรุป", "thank you", "happy", "sorry", "miss you", "remember"],
+    "transition": ["ไป", "ออกไป", "กลับ", "เดินทาง", "เจอกัน", "move", "go to", "leave", "travel", "meet"],
+    "activity": ["ทำ", "เล่น", "กิน", "ดู", "อ่าน", "ช่วย", "ไปเที่ยว", "work", "play", "eat", "watch", "read", "help", "visit"],
+    "conversation": ["คุย", "ถาม", "เล่า", "บอก", "คิดว่า", "talk", "ask", "tell", "think", "what", "how"]
+  }
+}

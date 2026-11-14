@@ -1,0 +1,38 @@
+# Human and humanoid kin
+human, rounded ears, __skin_tone__, __face__, __hair__
+elf, long pointed ears, __skin_tone__, __face__, __hair__
+high elf, graceful posture, long slender pointed ears, __skin_tone__, __face__, __hair__
+wood elf, sharp senses, leafy accents, pointed ears, __skin_tone__, __face__, __hair__
+dark elf, drow noble, obsidian skin, pointed ears, silver white hair, __face__
+half-elf, slightly pointed ears, __skin_tone__, __face__, __hair__
+dwarf, heavy brow, stout physique, __skin_tone__, __face__, __hair__
+halfling, petite stature, large bare feet, __skin_tone__, __face__, __hair__
+gnome, curious bright eyes, large rounded ears, __skin_tone__, __face__, __hair__
+
+# Planar, Beastkin and Draconic kin
+dragonborn, __scale_color__, reptilian snout, swept-back horns, __dragonborn_head__
+tiefling, curved horns above the temples, slender pointed tail, __fantasy_skin__, __face__, __hair__
+celestial aasimar, faint luminous halo, angelic grace, iridescent skin, feather accents, __face__, __hair__
+orc, protruding lower tusks, athletic muscular frame, __orc_skin__, __face__, __hair__
+goblin, large pointed ears, short upturned nose, nimble frame, __orc_skin__, __hair__
+kitsune beastkin, plush fox ears, fluffy fox tail, sly elegant smile, __skin_tone__, __face__, __hair__
+neko catgirl beastkin, soft feline cat ears, expressive cat tail, __skin_tone__, __face__, __hair__
+wolfkin therianthrope, sharp wolf ears, bushy wolf tail, alert gaze, __skin_tone__, __face__, __hair__
+fairy pixie, shimmering translucent insect wings, tiny pointed ears, luminous aura, __face__, __hair__
+
+# Monster Girl races & species
+succubus demon girl, curved horns, bat-like wings, spade-tipped tail, sultry aura, __fantasy_skin__, __face__, __hair__
+vampire noble girl, pale porcelain skin, subtle fangs, crimson eyes, gothic grace, __face__, __hair__
+lamia serpent girl, human upper body, long coiled iridescent snake tail, slender torso, __skin_tone__, __face__, __hair__
+harpy girl, plumage feathers, broad winged arms, avian talons, wild graceful demeanor, __skin_tone__, __face__, __hair__
+mermaid siren, shimmering aquatic scales, dorsal fin accents, webbed ears, __skin_tone__, __face__, __hair__
+slime girl, translucent gelatinous body, glowing viscous hair, glossy reflective skin, __fantasy_skin__, __face__
+arachne spider girl, human upper torso, velvety spider abdomen with multi-jointed legs, __skin_tone__, __face__, __hair__
+centaur warrior girl, equine lower body, toned athletic human torso, __skin_tone__, __face__, __hair__
+dragonewt girl, reptilian tail, dragon horns, scattered gemstone scales along collarbone, __skin_tone__, __face__, __hair__
+dullahan knight girl, headless equestrian spirit holding ornate helmet, ethereal neck flame, dark armor, __face__
+gorgon girl, living slender snake tendrils for hair, mesmerizing gaze, subtle serpent scales, __face__
+moth girl, soft fluffy neck ruff, antennae, large velvet moth wings, __skin_tone__, __face__, __hair__
+mummy girl, ancient mystic linen wraps, antique gold hieroglyphic amulets, golden gaze, __skin_tone__, __face__, __hair__
+minotaur girl, curved bovine horns, tufted tail, statuesque muscular build, __skin_tone__, __face__, __hair__
+valkyrie warrior maiden, luminous silver armor, majestic white swan wings, radiant gaze, __skin_tone__, __face__, __hair__

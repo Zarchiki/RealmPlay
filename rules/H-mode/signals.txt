@@ -1,0 +1,81 @@
+H_MODE_INTERCOURSE_KWS = (
+    "penetrate", "penetration", "thrust", "intercourse", "fuck", "fucking", "cock", "dick", "pussy",
+    "cum", "creampie", "fingering", "dildo", "clit", "clitoris",
+    "faster", "speed up", "quicker", "accelerate", "rapid thrust", "pound harder",
+    "สอดใส่", "สอดแทรก", "แทรกกาย", "กระแทก", "บดเอว", "ซอยเอว", "ซอยสะโพก", "ซอยถี่", "ซอยรัว", "ซอยยิก", "เย็ด", "หลั่งใน", "แตกใน",
+    "หี", "ควย", "จู๋", "จิ๋ม", "แตด", "ร่องรัก", "รูรัก", "ช่องทางรัก", "กลีบเนื้อ", "แคม",
+    "ท่อนเอ็น", "แกนกาย", "ลำลึงค์", "ปลายบาน", "หัวควย",
+    "แหย่", "สอดนิ้ว", "แยง", "กระเด้า", "ยัดเยียด", "แทงเข้า", "เสียบ",
+    "เร่งจังหวะ", "เร็วขึ้น", "กระแทกเร็ว", "ขยับเร็ว", "ถี่กระชั้น", "แรงอีก", "เร็วอีก",
+)
+H_MODE_ORAL_KWS = (
+    "blowjob", "deepthroat", "cunnilingus", "fellatio", "suck cock", "suck dick", "oral",
+    "lick pussy", "eat out", "eat pussy", "face sitting", "facesitting", "throat",
+    "อมควย", "ดูดควย", "อมจู๋", "ดูดจู๋", "เลียหี", "เลียแตด", "อมให้", "เลียให้", "ดูดให้",
+    "ใช้ปาก", "เป่าปี่", "ตวัดลิ้น", "ดูดดุน", "กลืนกินน้ำรัก", "อมมิดด้าม", "ลึกถึงคอหอย",
+    "คุกเข่าอม", "เลียช่องรัก", "เลียร่องรัก", "อมลำ",
+)
+H_MODE_FOREPLAY_KWS = (
+    "foreplay", "tease", "teasing", "caress", "edging", "fondle", "undress", "nibble", "grope",
+    "strip", "unbutton", "touching", "erogenous", "nipple", "boobs", "breasts",
+    "เล้าโลม", "ลูบไล้", "คลึง", "สะกิด", "ขบกัด", "ปลดกระดุม", "เปลื้องผ้า", "หยอกเย้า",
+    "แก้ผ้า", "ปลดผ้า", "ถอดเสื้อผ้า", "ถอดกางเกง", "ถอดกระโปรง", "ถอดบรา", "ถอดชั้นใน", "ถอดกกน",
+    "ลูบขา", "ลูบขาอ่อน", "ลูบต้นขา", "ลูบหน้าท้อง", "ลูบสะโพก", "ขยำนม", "บีบนม", "บีบก้น", "ขย้ำก้น",
+    "หัวนม", "ยอดอก", "ปทุมถัน", "เต้า", "เนินอก", "เนินเนื้อ", "เม็ดทับทิม", "ปุ่มกระสัน", "จุดเสียว",
+    "นม", "ขยำ", "จับอก", "บีบเค้น", "สัมผัสตัว", "สัมผัสกาย", "นิ้วแหย่", "ใช้นิ้ว",
+)
+H_MODE_EMBRACING_KWS = (
+    "kiss", "kissing", "embrace", "french kiss", "hug", "nuzzle", "maul", "hickey", "necking",
+    "จูบ", "กอดรัด", "ซุก", "ไซร้", "บดเบียด", "ดูดดื่ม", "แลกลิ้น", "กัดคอ",
+    "ดูดปาก", "ประกบปาก", "บดจูบ", "จูบปาก", "สอดลิ้น", "ตวัดลิ้น", "ซุกไซร้", "ฟัดคอ", "รอยกัด", "รอยดูด",
+)
+H_MODE_REFLEX_KWS = (
+    "reflex", "reflexes", "involuntary", "spasm", "twitch", "goosebumps", "flush",
+    "pupil", "curl", "curling", "clench", "shiver", "shivering", "squirt", "tight",
+    "สะท้อน", "ขนลุก", "กระตุกเกร็ง", "จิกเกร็ง", "แอ่นตัว", "สั่นระริก", "สะอึก", "ตอดรัด", "หน้าแดง",
+    "ตอดตุบ", "ตอดถี่", "น้ำเดิน", "แฉะ", "ฉ่ำเยิ้ม", "เยิ้ม", "น้ำเงี่ยน", "น้ำกาม", "น้ำหล่อลื่น",
+    "เสียวจนทนไม่ไหว", "เสียวแปลบ", "เกร็งกระตุก",
+)
+H_MODE_FANTASY_KWS = (
+    "tentacle", "tentacles", "slime", "slimes", "creature", "monster", "alien",
+    "overstimulation", "overstimulated", "trance", "hypnotic", "mindbreak", "mindmelt",
+    "dazed", "sensory overload", "continuous orgasm",
+    "รยางค์", "หนวด", "เมือก", "สัตว์ประหลาด", "อสูร", "ภวังค์", "มัวเมา", "เคลิ้ม",
+    "ตาค้าง", "สมองโล่ง", "ไร้สติ", "เสียวเกินทน", "เสร็จซ้ำ", "คลั่งตัณหา",
+)
+H_MODE_PSYCHOLOGY_KWS = (
+    "praise", "praise kink", "orgasm denial", "aftercare", "sub-drop", "spanking",
+    "submission", "dominance", "surrender", "begging", "dirty talk", "cuddle", "afterglow",
+    "hold me", "exhausted", "tired", "rest", "wipe", "clean up",
+    "ยอมจำนน", "เด็กดี", "อ้อนวอน", "กักขัง", "ครอบงำ", "ลงโทษ", "ตีตรา", "ปลอบโยน", "ดูแลหลังร่วมรัก",
+    "ขอร้อง", "ก้มกราบ", "เป็นของนาย", "เป็นของคุณ", "สั่งการ", "ขออีก", "อย่าหยุด",
+    "เหนื่อยแล้ว", "กอดพัก", "นอนกอด", "เช็ดตัว", "หลับตา", "จุ๊บหน้าผาก", "พักผ่อน", "หมดแรง", "เคลิ้มหลับ",
+)
+H_MODE_PREFERENCE_KWS = (
+    "kink", "kinks", "fetish", "slow-burn", "slow burn",
+    "breeding", "creampie", "bondage", "restraint", "femdom",
+    "mistress", "brat", "bratty", "mirror play", "exhibitionist",
+    "รสนิยม", "คุมเกม", "ราชินี", "พันธนาการ", "มัดมือ", "มัดแขน", "โดนมัด", "กระจกเงา",
+    "ขึ้นคร่อม", "ขย่ม", "ท่าหมา", "นอนลง", "แยกขา", "แหกขา", "ยกขา", "โก่งก้น", "แอ่นก้น",
+)
+H_MODE_EMOTION_SIGNALS = (
+    "aroused", "lust", "moaning", "ahegao", "mindbreak", "seductive", "flirty",
+    "needy", "begging", "breathless", "euphoric", "orgasmic", "afterglow", "lewd",
+    "shameless", "embarrassed_aroused", "submissive_aroused", "dominant_aroused",
+    "vulnerable_aroused", "yearning", "overwhelmed", "femdom", "submissive", "sensual",
+    , "กำหนัด", "ร่าน", "กระสัน", "มักมาก", "ตัณหา", "เสียว", "เคลิ้ม",
+)
+
+H_MODE_GENERAL_NSFW_KWS = (
+    "18+", "intimate", "sexual", "sex", "nude", "naked", "erotic",
+    "groan", "pant", "breathless", "hysteria",  "shameless", "desperate",
+    "ร่วมรัก", "มีเซ็กส์", "เซ็กส์", "มีเพศสัมพันธ์", "มีอะไรกัน", "ทำเรื่องอย่างว่า",
+    "คราง", "ราคะ", "กาม", "กำหนัด", "เสียว", "จะแตกแล้ว", "จะเสร็จแล้ว",
+    "เงี่ยน", "อวัยวะเพศ", "ต้องการตัว", "ร่าน", "กระสัน", "ไฟตัณหา",
+)
+
+ALL_H_MODE_SIGNALS = (
+    H_MODE_INTERCOURSE_KWS + H_MODE_ORAL_KWS + H_MODE_FOREPLAY_KWS + H_MODE_EMBRACING_KWS + H_MODE_REFLEX_KWS +
+    H_MODE_FANTASY_KWS + H_MODE_PSYCHOLOGY_KWS + H_MODE_PREFERENCE_KWS + H_MODE_EMOTION_SIGNALS +
+    H_MODE_GENERAL_NSFW_KWS
+)

@@ -10,11 +10,96 @@ Manages:
 import json
 import os
 import random
+import re
 import time
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 REWARDS_FILE_NAME = "rewards.json"
 MAX_LEVEL = 999
+ITEMS_DIR = Path(__file__).resolve().parent / "data" / "items"
+
+
+def _load_item_collection(filename: str, fallback: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Load a data-driven item collection, retaining a safe code fallback."""
+    try:
+        data = json.loads((ITEMS_DIR / filename).read_text(encoding="utf-8"))
+        if isinstance(data, list) and all(isinstance(item, dict) and item.get("name") for item in data):
+            return data
+    except (OSError, ValueError, TypeError):
+        pass
+    return fallback
+
+
+def _load_item_object(filename: str, fallback: Dict[str, Any]) -> Dict[str, Any]:
+    try:
+        data = json.loads((ITEMS_DIR / filename).read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else fallback
+    except (OSError, ValueError, TypeError):
+        return fallback
+
+
+def _wardrobe_item_id(slot: str, name: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", str(name).lower()).strip("-")
+    return f"wardrobe:{slot}:{slug or 'item'}"
+
+
+def wardrobe_shop_catalog(slot: Optional[str] = None, q: Optional[str] = None,
+                          limit: int = 60, offset: int = 0) -> Dict[str, Any]:
+    """Derive purchasable wardrobe entries from the wildcard catalog on demand."""
+    try:
+        source = json.loads((Path(__file__).resolve().parent / "data" / "wardrobe_catalog.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return {"items": [], "total": 0, "limit": limit, "offset": offset, "slots": {}}
+    rules = _load_item_object("wardrobe_shop_rules.json", {})
+    overrides = _load_item_object("wardrobe_overrides.json", {}).get("overrides", {})
+    overrides = overrides if isinstance(overrides, dict) else {}
+    defaults = rules.get("default", {}) if isinstance(rules.get("default"), dict) else {}
+    slot_rules = rules.get("slots", {}) if isinstance(rules.get("slots"), dict) else {}
+    slots_data = source.get("slots", {}) if isinstance(source.get("slots"), dict) else {}
+    selected = {slot: slots_data.get(slot, [])} if slot else slots_data
+    query = str(q or "").strip().lower()
+    all_items: List[Dict[str, Any]] = []
+    for current_slot, entries in selected.items():
+        per_slot = slot_rules.get(current_slot, {}) if isinstance(slot_rules.get(current_slot), dict) else {}
+        for entry in entries if isinstance(entries, list) else []:
+            if not isinstance(entry, dict) or not entry.get("name"):
+                continue
+            name, prompt = str(entry["name"]), str(entry.get("prompt") or entry["name"])
+            category = str(entry.get("category") or current_slot)
+            if query and query not in name.lower() and query not in prompt.lower() and query not in category.lower():
+                continue
+            item_id = _wardrobe_item_id(current_slot, name)
+            override = overrides.get(item_id, {}) if isinstance(overrides.get(item_id), dict) else {}
+            effective = {**defaults, **per_slot, **override}
+            effects = effective.get("effects") if isinstance(effective.get("effects"), dict) else {}
+            affection = int(effects.get("affection", effective.get("gift_affection", 3)))
+            all_items.append({"id": item_id, "name": name, "desc": f"{category} · {prompt}",
+                              "type": "wearable", "slot": current_slot, "prompt": prompt,
+                              "category": category, "source": "wardrobe_catalog",
+                              "price": max(1, int(effective.get("price", 140))),
+                              "rarity": str(effective.get("rarity", "Common")),
+                              "icon": str(effective.get("icon", "👗")),
+                              "effects": {"affection": max(0, affection)}})
+    safe_limit, safe_offset = min(max(1, int(limit)), 120), max(0, int(offset))
+    return {"items": all_items[safe_offset:safe_offset + safe_limit], "total": len(all_items),
+            "limit": safe_limit, "offset": safe_offset,
+            "slots": {key: len(value) for key, value in slots_data.items() if isinstance(value, list)}}
+
+
+def find_shop_item(item_id: str) -> Optional[Dict[str, Any]]:
+    regular = next((item for item in [*SHOP_CATALOG, *H_ITEM_CATALOG] if item.get("id") == item_id), None)
+    if regular or not str(item_id).startswith("wardrobe:"):
+        return regular
+    pieces = str(item_id).split(":", 2)
+    if len(pieces) != 3:
+        return None
+    first = wardrobe_shop_catalog(slot=pieces[1], limit=120)
+    for offset in range(0, first["total"], 120):
+        for item in wardrobe_shop_catalog(slot=pieces[1], limit=120, offset=offset)["items"]:
+            if item["id"] == item_id:
+                return item
+    return None
 
 # Base EXP requirement formula: level * 100
 def get_exp_for_level(level: int) -> int:
@@ -116,6 +201,40 @@ GACHA_POOL: List[Dict[str, Any]] = [
     {"name": "แหวนสัญญาแห่งดวงดาว", "type": "special", "rarity": "SSR", "icon": "💍", "desc": "แหวนแห่งพันธสัญญาพิเศษ มอบให้เพื่อแทนใจนิรันดร์", "weight": 3},
     {"name": "ชุดนอนผ้าซาตินเย้ายวน", "type": "special", "rarity": "SSR", "icon": "👗", "desc": "ชุดนอนผ้าซาตินบางเบา เพิ่มความใกล้ชิดและความเสน่หาอย่างเร่าร้อน", "weight": 2}
 ]
+
+# A separate pool for items that can be transferred to a character and equipped
+# into a concrete wardrobe slot.  ``slot`` and ``prompt`` are preserved all the
+# way through player and character inventories.
+WARDROBE_GACHA_POOL: List[Dict[str, Any]] = [
+    {"id": "wg_denim_jacket", "name": "แจ็กเก็ตเดนิมวินเทจ", "type": "wearable", "slot": "outer", "prompt": "vintage denim jacket", "category": "casual outerwear", "rarity": "Common", "icon": "🧥", "desc": "แจ็กเก็ตเดนิมทรงพอดีตัวสำหรับลุคสบาย ๆ", "weight": 24},
+    {"id": "wg_oversized_hoodie", "name": "ฮู้ดดี้โอเวอร์ไซซ์", "type": "wearable", "slot": "outer", "prompt": "oversized cozy hoodie", "category": "casual outerwear", "rarity": "Common", "icon": "🧢", "desc": "ฮู้ดดี้นุ่ม ๆ สำหรับวันพักผ่อน", "weight": 24},
+    {"id": "wg_knit_top", "name": "เสื้อไหมพรมคอเต่า", "type": "wearable", "slot": "top", "prompt": "fitted ribbed turtleneck sweater", "category": "tops", "rarity": "Common", "icon": "👚", "desc": "เสื้อไหมพรมเรียบหรูใส่ง่าย", "weight": 22},
+    {"id": "wg_pleated_skirt", "name": "กระโปรงพลีตคลาสสิก", "type": "wearable", "slot": "bottom", "prompt": "classic pleated midi skirt", "category": "bottoms", "rarity": "Uncommon", "icon": "👗", "desc": "กระโปรงพลีตทรงคลาสสิก", "weight": 16},
+    {"id": "wg_leather_boots", "name": "บูทหนังข้อสั้น", "type": "wearable", "slot": "shoes", "prompt": "black leather ankle boots", "category": "shoes", "rarity": "Uncommon", "icon": "🥾", "desc": "บูทหนังสำหรับลุคมั่นใจ", "weight": 16},
+    {"id": "wg_silk_blouse", "name": "เสื้อเบลาส์ผ้าไหม", "type": "wearable", "slot": "top", "prompt": "elegant silk blouse", "category": "tops", "rarity": "Rare", "icon": "✨", "desc": "เบลาส์ผ้าไหมเนื้อดีสำหรับโอกาสพิเศษ", "weight": 8},
+    {"id": "wg_nightdress", "name": "ชุดนอนซาติน", "type": "wearable", "slot": "top", "prompt": "elegant satin nightdress", "category": "sleepwear", "rarity": "Rare", "icon": "🌙", "desc": "ชุดนอนซาตินเรียบหรู", "weight": 7},
+    {"id": "wg_star_pendant", "name": "จี้ดาวเงิน", "type": "wearable", "slot": "neck_acc", "prompt": "delicate silver star pendant necklace", "category": "accessories", "rarity": "Rare", "icon": "📿", "desc": "จี้เงินรูปดาวสำหรับสวมเป็นเครื่องประดับ", "weight": 6},
+    {"id": "wg_evening_gown", "name": "ชุดราตรีกำมะหยี่", "type": "wearable", "slot": "preset", "prompt": "elegant midnight velvet evening gown, matching heels", "category": "full outfit", "rarity": "SSR", "icon": "💜", "desc": "ชุดราตรีเต็มเซ็ตสำหรับค่ำคืนพิเศษ", "weight": 2},
+]
+
+# `data/items` is the editable source of truth. The declarations above are
+# only a resilient fallback when a deployment has not copied data files yet.
+SHOP_CATALOG = _load_item_collection("shop.json", SHOP_CATALOG)
+H_ITEM_CATALOG: List[Dict[str, Any]] = _load_item_collection("h_items.json", [
+    {"id": "h_silk_blindfold", "name": "ผ้าปิดตาผ้าไหม", "type": "h_item", "category": "kinky_toy", "price": 90, "rarity": "Common", "icon": "🖤", "desc": "ผ้าปิดตานุ่มสำหรับ roleplay แบบยินยอม", "effects": {"affection": 4}},
+    {"id": "h_velvet_cuffs", "name": "ปลอกข้อมือกำมะหยี่", "type": "h_item", "category": "kinky_toy", "price": 140, "rarity": "Uncommon", "icon": "⛓️", "desc": "ปลอกข้อมือบุนุ่มสำหรับเกมบทบาทสมมติ", "effects": {"affection": 6}},
+    {"id": "h_teasing_feather", "name": "ขนนกสำหรับหยอกล้อ", "type": "h_item", "category": "kinky_toy", "price": 75, "rarity": "Common", "icon": "🪶", "desc": "พร็อพสัมผัสเบา ๆ สำหรับเพิ่มบรรยากาศ", "effects": {"affection": 4}},
+    {"id": "h_wand_massager", "name": "Wand Massager", "type": "h_item", "category": "kinky_toy", "price": 280, "rarity": "Rare", "icon": "✨", "desc": "อุปกรณ์ massage สำหรับผู้ใหญ่ ใช้เมื่อทุกฝ่ายยินยอม", "effects": {"affection": 10}},
+    {"id": "h_remote_vibrator", "name": "Remote Vibrator", "type": "h_item", "category": "kinky_toy", "price": 420, "rarity": "Rare", "icon": "🎛️", "desc": "อุปกรณ์สำหรับผู้ใหญ่แบบควบคุมระยะไกล", "effects": {"affection": 12}},
+    {"id": "h_bondage_kit", "name": "Kinky Bondage Kit", "type": "h_item", "category": "kinky_toy", "price": 650, "rarity": "Super Rare", "icon": "🔗", "desc": "ชุดพร็อพ roleplay สำหรับผู้ใหญ่ โดยต้องมีข้อตกลงชัดเจน", "effects": {"affection": 18}},
+])
+GACHA_POOL = _load_item_collection("gift_gacha.json", GACHA_POOL)
+WARDROBE_GACHA_POOL = _load_item_collection("wardrobe_gacha.json", WARDROBE_GACHA_POOL)
+
+GACHA_CONFIG = {
+    "gift": {"pool": GACHA_POOL, "label": "Mystery Gift Gacha", "cost": 50, "ten_cost": 450},
+    "wardrobe": {"pool": WARDROBE_GACHA_POOL, "label": "Wardrobe Gacha", "cost": 60, "ten_cost": 540},
+}
 
 DEFAULT_SKILLS = [
     {
@@ -323,12 +442,35 @@ def upgrade_skill(username: str, skill_id: str) -> Dict[str, Any]:
     save_player_rewards(username, profile)
     return {"ok": True, "profile": profile}
 
-def buy_shop_item(username: str, item_id: str, qty: int = 1) -> Dict[str, Any]:
+def buy_shop_item(username: str, item_id: str, qty: int = 1, color: Optional[str] = None) -> Dict[str, Any]:
     if qty < 1:
         qty = 1
-    item = next((i for i in SHOP_CATALOG if i["id"] == item_id), None)
+    item = find_shop_item(item_id)
     if not item:
         return {"ok": False, "error": f"Item {item_id} not in catalog"}
+
+    # Clone item dict to customize for purchased variant (e.g. color)
+    item = dict(item)
+    clean_color = str(color or "").strip().lower()
+    if clean_color and clean_color != "default":
+        from app.services.wardrobe_prompt import KNOWN_COLORS
+        if clean_color in KNOWN_COLORS:
+            item["color"] = clean_color
+            # Compose modified prompt with the selected color
+            raw_prompt = item.get("prompt") or item.get("name", "")
+            # Strip existing known colors from start/body
+            rx = r'\b(?:' + '|'.join(KNOWN_COLORS) + r')\b'
+            stripped_prompt = re.sub(rx, '', raw_prompt, flags=re.I)
+            stripped_prompt = re.sub(r'\s+', ' ', stripped_prompt).strip(' ,')
+            item["prompt"] = f"{clean_color} {stripped_prompt}".strip()
+            # Also update display name to reflect the color variant
+            color_cap = clean_color.capitalize()
+            base_name = item.get("name", "")
+            # If base name doesn't start with the color already, prefix it
+            if not base_name.lower().startswith(clean_color):
+                # Strip other color prefix in base_name if present
+                base_name_clean = re.sub(rx, '', base_name, flags=re.I).strip()
+                item["name"] = f"{color_cap} {base_name_clean}".strip()
 
     profile = get_player_rewards(username)
 
@@ -351,17 +493,11 @@ def buy_shop_item(username: str, item_id: str, qty: int = 1) -> Dict[str, Any]:
     for existing in inv:
         if existing.get("name") == item["name"]:
             existing["qty"] = int(existing.get("qty", 1)) + qty
+            existing.update({key: item[key] for key in ("id", "slot", "prompt", "category", "source", "effects", "color") if key in item})
             found = True
             break
     if not found:
-        inv.append({
-            "name": item["name"],
-            "qty": qty,
-            "desc": item.get("desc", ""),
-            "icon": item.get("icon", "🎁"),
-            "type": item.get("type", "item"),
-            "rarity": item.get("rarity", "Common")
-        })
+        inv.append({key: item[key] for key in ("id", "name", "desc", "icon", "type", "rarity", "slot", "prompt", "category", "source", "effects", "color") if key in item} | {"qty": qty})
     profile["inventory"] = inv
     save_player_rewards(username, profile)
 
@@ -372,11 +508,14 @@ def buy_shop_item(username: str, item_id: str, qty: int = 1) -> Dict[str, Any]:
         "item": item
     }
 
-def pull_gacha(username: str, pull_count: int = 1) -> Dict[str, Any]:
+def pull_gacha(username: str, pull_count: int = 1, pool_type: str = "gift") -> Dict[str, Any]:
     if pull_count not in (1, 10):
         pull_count = 1
-    cost_per_pull = 50
-    total_cost = (cost_per_pull * 10 - 50) if pull_count == 10 else cost_per_pull  # 10 pulls discount to 450 coins
+    config = GACHA_CONFIG.get(str(pool_type or "gift").lower())
+    if not config:
+        return {"ok": False, "error": "Unknown gacha pool"}
+    pool = config["pool"]
+    total_cost = config["ten_cost"] if pull_count == 10 else config["cost"]
 
     profile = get_player_rewards(username)
     if profile["coins"] < total_cost:
@@ -395,13 +534,13 @@ def pull_gacha(username: str, pull_count: int = 1) -> Dict[str, Any]:
     for _ in range(pull_count):
         # Build weighted pool with luck adjustment
         pool_weights = []
-        for it in GACHA_POOL:
+        for it in pool:
             w = it["weight"]
             if it.get("rarity") in ("Rare", "SSR"):
                 w = int(w * rare_multiplier)
             pool_weights.append(w)
 
-        chosen = random.choices(GACHA_POOL, weights=pool_weights, k=1)[0]
+        chosen = random.choices(pool, weights=pool_weights, k=1)[0]
         won_items.append(dict(chosen))
 
         # Add to player inventory
@@ -414,13 +553,10 @@ def pull_gacha(username: str, pull_count: int = 1) -> Dict[str, Any]:
                 break
         if not found:
             inv.append({
-                "name": chosen["name"],
-                "qty": 1,
-                "desc": chosen.get("desc", ""),
-                "icon": chosen.get("icon", "🎁"),
-                "type": chosen.get("type", "item"),
-                "rarity": chosen.get("rarity", "Common")
-            })
+                key: chosen[key] for key in (
+                    "id", "name", "desc", "icon", "type", "rarity", "slot", "prompt", "category"
+                ) if key in chosen
+            } | {"qty": 1})
         profile["inventory"] = inv
 
     save_player_rewards(username, profile)
@@ -428,5 +564,7 @@ def pull_gacha(username: str, pull_count: int = 1) -> Dict[str, Any]:
         "ok": True,
         "items": won_items,
         "cost": total_cost,
+        "pool_type": pool_type,
+        "pool_label": config["label"],
         "profile": profile
     }

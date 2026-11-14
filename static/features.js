@@ -430,19 +430,195 @@ async function openRuleInspector(){
   const save=rpCardButton('Save rule settings',()=>rpRun(async()=>{await rpApi('/api/configuration',{rules:{proactive_state:form.querySelector('#rp-rule-proactive').checked,loop_guard:form.querySelector('#rp-rule-loop').checked,prohibitions:form.querySelector('#rp-rule-prohibitions').checked,expressive_vocalization:form.querySelector('#rp-rule-vocalization').checked,image_trigger:form.querySelector('#rp-rule-image').checked,auto_wardrobe:form.querySelector('#rp-rule-wardrobe').checked,trace_prompts:form.querySelector('#rp-rule-trace').checked,nsfw_mode:form.querySelector('#rp-rule-nsfw').value}});document.getElementById('rp-dialog').close();}));form.append(save);content.append(form);
   const runs=[...(data.activity?.active||[]),...(data.activity?.recent||[])];if(runs.length){const trace=document.createElement('details');trace.innerHTML='<summary>Recent execution trace</summary>';runs.forEach(run=>{const pre=document.createElement('pre');pre.textContent=JSON.stringify(run,null,2);trace.append(pre);});content.append(trace);}
 }
+const RP_ESSENTIAL_RULES = new Set([
+  'system_instruction', 'language_adaptation', 'self_recognition',
+  'content_policy_local_model', 'prohibitions', 'proactive_state'
+]);
+
+let _cachedRuleData = null;
+let _cachedRuleConfig = null;
+let _currentRuleOrder = [];
+
+window.getMovableRulePriority = function() {
+  return _currentRuleOrder.filter(id => !RP_ESSENTIAL_RULES.has(id));
+};
+
+window.resetRulePriority = function() {
+  if (!_cachedRuleData) return;
+  const defaultKeys = Object.keys(_cachedRuleData.rules || {}).filter(k => !RP_ESSENTIAL_RULES.has(k));
+  _currentRuleOrder = defaultKeys;
+  buildRuleEditorDOM();
+  if (typeof showNotice === 'function') showNotice('คืนลำดับ Rule priority ตามค่าเริ่มต้นแล้ว (อย่าลืมกดบันทึก)');
+};
+
+function moveRulePriority(fromIdx, toIdx) {
+  if (fromIdx < 0 || toIdx < 0 || fromIdx >= _currentRuleOrder.length || toIdx >= _currentRuleOrder.length) return;
+  const item = _currentRuleOrder.splice(fromIdx, 1)[0];
+  _currentRuleOrder.splice(toIdx, 0, item);
+  buildRuleEditorDOM();
+}
+
+function buildRuleEditorDOM() {
+  const target = document.getElementById('rp-rule-editor-list');
+  if (!target || !_cachedRuleData) return;
+  const rules = _cachedRuleData.rules || {};
+  const overrides = (_cachedRuleConfig && _cachedRuleConfig.rule_overrides) || {};
+
+  const frag = document.createDocumentFragment();
+
+  // 1. Essential rules pinned at top
+  const essentialKeys = Object.keys(rules).filter(k => RP_ESSENTIAL_RULES.has(k));
+  if (essentialKeys.length) {
+    const essHeader = document.createElement('div');
+    essHeader.style.cssText = 'font-size:10.5px;font-weight:700;color:var(--text-muted);margin:4px 0 2px;letter-spacing:.4px;text-transform:uppercase;';
+    essHeader.textContent = '🔒 Essential rules (Pinned First)';
+    frag.appendChild(essHeader);
+
+    essentialKeys.forEach(id => {
+      const rule = rules[id];
+      const row = document.createElement('details');
+      row.className = 'rp-rule-editor-row rp-rule-essential';
+      row.style.borderLeft = '3px solid #6366f1';
+      const summary = document.createElement('summary');
+      summary.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="color:#818cf8;font-size:11px;">🔒</span> <strong>${id}</strong></span>`;
+      row.append(summary);
+      const text = document.createElement('p'); text.textContent = rule.description || ''; row.append(text);
+      const stage = document.createElement('small'); stage.textContent = `Stage: ${rule.stage || '—'}${overrides[id] ? ' · Custom instruction active' : ''}`; row.append(stage);
+      const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'btn btn-secondary';
+      edit.textContent = overrides[id] ? 'Edit instruction' : 'Customize';
+      edit.onclick = () => openRuleOverride(id, rule.description || '', overrides[id] || '');
+      row.append(edit);
+      frag.appendChild(row);
+    });
+  }
+
+  // 2. Movable priority rules
+  const movHeader = document.createElement('div');
+  movHeader.style.cssText = 'font-size:10.5px;font-weight:700;color:var(--text-muted);margin:10px 0 2px;letter-spacing:.4px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;';
+  movHeader.innerHTML = '<span>☰ Movable Priority (Drag & Drop / ▲▼)</span>';
+  frag.appendChild(movHeader);
+
+  let draggedItemIdx = null;
+
+  _currentRuleOrder.forEach((id, idx) => {
+    const rule = rules[id] || { description: '', stage: '—' };
+    const row = document.createElement('details');
+    row.className = 'rp-rule-editor-row rp-rule-movable';
+    row.draggable = true;
+    row.dataset.ruleId = id;
+    row.dataset.ruleIdx = idx;
+
+    // Drag event handlers
+    row.addEventListener('dragstart', (e) => {
+      draggedItemIdx = idx;
+      row.classList.add('rp-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(idx));
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('rp-dragging');
+      document.querySelectorAll('.rp-rule-movable').forEach(el => el.classList.remove('rp-drag-over'));
+    });
+    row.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      row.classList.add('rp-drag-over');
+    });
+    row.addEventListener('dragleave', () => {
+      row.classList.remove('rp-drag-over');
+    });
+    row.addEventListener('drop', (e) => {
+      e.preventDefault();
+      row.classList.remove('rp-drag-over');
+      const from = draggedItemIdx !== null ? draggedItemIdx : parseInt(e.dataTransfer.getData('text/plain'), 10);
+      const to = idx;
+      if (!isNaN(from) && from !== to) {
+        moveRulePriority(from, to);
+      }
+    });
+
+    const summary = document.createElement('summary');
+    summary.style.display = 'flex';
+    summary.style.alignItems = 'center';
+    summary.style.justifyContent = 'space-between';
+    summary.style.gap = '6px';
+
+    const left = document.createElement('span');
+    left.style.display = 'inline-flex';
+    left.style.alignItems = 'center';
+    left.style.gap = '8px';
+    left.innerHTML = `<span class="rp-drag-handle" title="คลิกลากเพื่อจัดลำดับ (Drag)" style="cursor:grab;color:var(--text-muted);font-size:14px;user-select:none;">☰</span> <span style="font-weight:700;">${id}</span>`;
+    summary.appendChild(left);
+
+    // Up / Down arrow buttons
+    const arrows = document.createElement('span');
+    arrows.style.display = 'inline-flex';
+    arrows.style.gap = '3px';
+    arrows.style.marginLeft = 'auto';
+
+    const upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.innerHTML = '▲';
+    upBtn.title = 'เลื่อนขึ้น (Move up)';
+    upBtn.style.cssText = 'border:1px solid #3e465c;background:#1a2030;color:#c7d2fe;border-radius:4px;padding:1px 6px;font-size:9px;cursor:pointer;line-height:1.3;';
+    if (idx === 0) { upBtn.disabled = true; upBtn.style.opacity = '0.35'; upBtn.style.cursor = 'default'; }
+    upBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); moveRulePriority(idx, idx - 1); };
+
+    const downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.innerHTML = '▼';
+    downBtn.title = 'เลื่อนลง (Move down)';
+    downBtn.style.cssText = 'border:1px solid #3e465c;background:#1a2030;color:#c7d2fe;border-radius:4px;padding:1px 6px;font-size:9px;cursor:pointer;line-height:1.3;';
+    if (idx === _currentRuleOrder.length - 1) { downBtn.disabled = true; downBtn.style.opacity = '0.35'; downBtn.style.cursor = 'default'; }
+    downBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); moveRulePriority(idx, idx + 1); };
+
+    arrows.appendChild(upBtn);
+    arrows.appendChild(downBtn);
+    summary.appendChild(arrows);
+    row.append(summary);
+
+    const text = document.createElement('p'); text.textContent = rule.description || ''; row.append(text);
+    const stage = document.createElement('small'); stage.textContent = `Stage: ${rule.stage || '—'}${overrides[id] ? ' · Custom instruction active' : ''}`; row.append(stage);
+    const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'btn btn-secondary';
+    edit.textContent = overrides[id] ? 'Edit instruction' : 'Customize';
+    edit.onclick = () => openRuleOverride(id, rule.description || '', overrides[id] || '');
+    row.append(edit);
+
+    frag.appendChild(row);
+  });
+
+  target.replaceChildren(frag);
+}
+
 async function renderRuleEditors(){
   const target=document.getElementById('rp-rule-editor-list');if(!target||!token)return;
   try{
     const [ruleData,configuration]=await Promise.all([rpApi('/api/rules'),rpApi('/api/configuration')]);
-    const overrides=configuration.rule_overrides||{};
-    target.replaceChildren(...Object.entries(ruleData.rules||{}).map(([id,rule])=>{
-      const row=document.createElement('details');row.className='rp-rule-editor-row';
-      const summary=document.createElement('summary');summary.textContent=id;row.append(summary);
-      const text=document.createElement('p');text.textContent=rule.description||'';row.append(text);
-      const stage=document.createElement('small');stage.textContent=`Stage: ${rule.stage||'—'}${overrides[id]?' · Custom instruction active':''}`;row.append(stage);
-      const edit=document.createElement('button');edit.type='button';edit.className='btn btn-secondary';edit.textContent=overrides[id]?'Edit instruction':'Customize';edit.onclick=()=>openRuleOverride(id,rule.description||'',overrides[id]||'');row.append(edit);
-      return row;
-    }));
+    _cachedRuleData = ruleData;
+    _cachedRuleConfig = configuration;
+
+    const allKeys = Object.keys(ruleData.rules || {});
+    const savedPriority = Array.isArray(configuration.rule_priority) ? configuration.rule_priority : [];
+    const movableKeys = allKeys.filter(k => !RP_ESSENTIAL_RULES.has(k));
+
+    // Combine saved priority with any new movable keys that weren't in savedPriority
+    const orderSet = new Set();
+    const ordered = [];
+    savedPriority.forEach(k => {
+      if (movableKeys.includes(k) && !orderSet.has(k)) {
+        orderSet.add(k);
+        ordered.push(k);
+      }
+    });
+    movableKeys.forEach(k => {
+      if (!orderSet.has(k)) {
+        orderSet.add(k);
+        ordered.push(k);
+      }
+    });
+
+    _currentRuleOrder = ordered;
+    buildRuleEditorDOM();
   }catch(error){target.textContent='โหลด Rule instructions ไม่สำเร็จ: '+error.message;}
 }
 function openRuleOverride(id,description,value){return rpRun(async()=>{
@@ -457,11 +633,11 @@ function openRuleOverride(id,description,value){return rpRun(async()=>{
 });}
 document.addEventListener('DOMContentLoaded',()=>setTimeout(installRuleProgressMonitor,500));
 const ruleProgressStyle=document.createElement('style');ruleProgressStyle.textContent='#rp-rule-progress{position:fixed;right:18px;bottom:18px;z-index:9999;width:min(360px,calc(100vw - 36px));padding:11px 12px;border:1px solid #46506b;border-radius:12px;background:#171b27eF;color:#e9edf8;box-shadow:0 12px 34px #0008;font:12px system-ui}.rp-rule-progress-top{display:flex;justify-content:space-between;gap:12px;font-weight:650}.rp-rule-progress-top button{border:0;background:transparent;color:#cbd5e1;cursor:pointer}.rp-rule-progress-top button:disabled{opacity:.35;cursor:not-allowed}.rp-rule-progress-track{height:6px;overflow:hidden;margin:9px 0 6px;border-radius:6px;background:#30384b;position:relative}.rp-rule-progress-track i{display:block;height:100%;width:0;min-width:12%;background:linear-gradient(90deg,#7c5cff,#42d3aa,#38bdf8);background-size:200% 100%;animation:rpProgressShimmer 1.6s linear infinite;transition:width .25s ease}.rp-rule-progress-error .rp-rule-progress-track i{background:#ef5c78;animation:none}#rp-rule-progress small{display:none}@keyframes rpProgressShimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}.rp-rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}.rp-rule-grid section{border:1px solid #3d4357;border-radius:9px;padding:9px}.rp-rule-grid small{display:block;color:#aab4ca}.rp-rule-grid p{margin:6px 0 0;font-size:12px}.rp-rule-grid+ h3{margin-top:18px}#rp-dialog-content>div>label{display:block;margin:10px 0}';document.head.append(ruleProgressStyle);
-const rpInlineUiStyle=document.createElement('style');rpInlineUiStyle.textContent='#rp-rule-progress.rp-inline-progress{position:static;right:auto;bottom:auto;z-index:auto;width:auto;margin:7px 0 0;padding:8px 10px;border-color:#3b4664;background:#151b2ae8;box-shadow:none;transition:opacity .45s ease,transform .45s ease}.rp-inline-progress.rp-progress-fade{opacity:0;transform:translateY(-5px);pointer-events:none}.rp-generating-bubble{color:#aab8d2;font-style:italic;display:flex;align-items:center;gap:6px}.rp-generating-bubble::after{content:"";display:inline-block;width:12px;height:12px;border:2px solid rgba(167,139,250,.3);border-top-color:#a78bfa;border-radius:50%;animation:rpSpin 0.7s linear infinite}@keyframes rpSpin{to{transform:rotate(360deg)}}.rp-rule-editor-list{display:grid;gap:6px}.rp-rule-editor-row{border:1px solid #394158;border-radius:8px;padding:8px 10px;background:#1d2230}.rp-rule-editor-row summary{cursor:pointer;font-weight:700;color:#e4e7f2}.rp-rule-editor-row p{margin:8px 0 5px;font-size:12px;line-height:1.45;color:#bec8db}.rp-rule-editor-row small{display:block;color:#9faac0;margin-bottom:8px}.rp-rule-editor-row .btn{padding:5px 8px;font-size:11px}';document.head.append(rpInlineUiStyle);
+const rpInlineUiStyle=document.createElement('style');rpInlineUiStyle.textContent='#rp-rule-progress.rp-inline-progress{position:static;right:auto;bottom:auto;z-index:auto;width:auto;margin:7px 0 0;padding:8px 10px;border-color:#3b4664;background:#151b2ae8;box-shadow:none;transition:opacity .45s ease,transform .45s ease}.rp-inline-progress.rp-progress-fade{opacity:0;transform:translateY(-5px);pointer-events:none}.rp-generating-bubble{color:#aab8d2;font-style:italic;display:flex;align-items:center;gap:6px}.rp-generating-bubble::after{content:"";display:inline-block;width:12px;height:12px;border:2px solid rgba(167,139,250,.3);border-top-color:#a78bfa;border-radius:50%;animation:rpSpin 0.7s linear infinite}@keyframes rpSpin{to{transform:rotate(360deg)}}.rp-rule-editor-list{display:grid;gap:6px}.rp-rule-editor-row{border:1px solid #394158;border-radius:8px;padding:8px 10px;background:#1d2230}.rp-rule-editor-row summary{cursor:pointer;font-weight:700;color:#e4e7f2}.rp-rule-editor-row p{margin:8px 0 5px;font-size:12px;line-height:1.45;color:#bec8db}.rp-rule-editor-row small{display:block;color:#9faac0;margin-bottom:8px}.rp-rule-editor-row .btn{padding:5px 8px;font-size:11px}.rp-dragging{opacity:0.4;border-style:dashed!important}.rp-drag-over{border-color:#818cf8!important;background:#242a3e!important;transform:scale(1.01)}.rp-drag-handle:active{cursor:grabbing!important}';document.head.append(rpInlineUiStyle);
 saveRightPaneAll=async function(){
   const name=activeCharacter;if(!name)return;
   const base=`/api/characters/${encodeURIComponent(name)}`;
-  await rpApi(base+'/state',{character_name:name,status:document.getElementById('pane-input-status').value,scenario:document.getElementById('pane-input-situation').value,memory:document.getElementById('pane-input-memory').value,appearance:document.getElementById('pane-input-appearance').value});
+  await rpApi(base+'/state',{character_name:name,status:document.getElementById('pane-input-status').value,scenario:situationPaneValueForSave(),memory:document.getElementById('pane-input-memory').value,appearance:document.getElementById('pane-input-appearance').value});
   await rpApi(base+'/outfits',{outfits:currentWardrobe});
 };
 async function loadFeatureSettings(){
@@ -484,6 +660,13 @@ async function loadFeatureSettings(){
   </div>
   <label class="rp-workflow-toggle"><input type="checkbox" id="rp-workflow-enabled" ${c.enabled!==false?'checked':''} onchange="updateCustomWorkflowToggle()"> <strong>Custom Workflow</strong> <span id="rp-workflow-enabled-state"></span></label><label>Workflow <select id="rp-workflow" class="form-input"></select></label><button class="btn btn-secondary" data-custom-workflow onclick="document.getElementById('rp-workflow-file').click()">Import API workflow</button><input id="rp-workflow-file" type="file" accept=".json" hidden onchange="rpRun(()=>importWorkflow(this.files[0]))"><button class="btn btn-secondary" data-custom-workflow onclick="rpRun(editWorkflow)">Edit workflow</button><button class="btn btn-secondary" onclick="rpRun(refreshComfyOptions)">Refresh options</button>`;
   for(const k of ['checkpoint','vae','clip','sampler','scheduler']) container.innerHTML+=`<label>${k}<select class="form-input" id="rp-${k}"><option>${escapeHtml(c[k]||'')}</option></select></label>`;
+  container.innerHTML+=`<details id="rp-facedetailer-settings" style="margin:8px 0;padding:8px;background:rgba(255,255,255,0.02);border:1px solid #3b4252;border-radius:8px">
+    <summary style="cursor:pointer;font-weight:600;color:#93c5fd">🔍 FaceDetailer / SAM Model Settings</summary>
+    <div style="margin-top:8px">
+      <label>SAM Model (FaceDetailer)<select class="form-input" id="rp-sam_model"><option>${escapeHtml(c.sam_model||'(Automatic / From Workflow)')}</option></select></label>
+      <small style="color:var(--text-muted);display:block;margin-top:4px">เลือก Base (sam_vit_b ~375MB) เพื่อความเร็วสูงสุด หรือ Huge (sam_vit_h ~2.5GB) ตามต้องการ</small>
+    </div>
+  </details>`;
   for(const [k,d] of Object.entries({width:576,height:1024,steps:25,cfg:7,seed:-1,denoise:1,clip_skip:1,timeout:300})) container.innerHTML+=rpField(k,k,c[k]??d,'number',['cfg','denoise'].includes(k)?'.01':'1');
   for(const k of ['negative_prompt','prompt_suffix','emotion']) container.innerHTML+=`<label>${k}<textarea class="form-input" id="rp-${k}">${escapeHtml(c[k]||'')}</textarea></label>`;
   container.innerHTML+='<p>ข้อมูลส่งสร้างภาพ (scene จาก Prompt มาก่อน)</p>'+['appearance','wardrobe','situation','memory','emotion'].map(k=>`<label style="display:block"><input type="checkbox" data-rp-source="${k}" ${(c.sources||['appearance','wardrobe','emotion']).includes(k)?'checked':''}>${k}</label>`).join('');
@@ -501,7 +684,7 @@ async function saveLlmConfig(){
 }
 async function saveComfyConfig(){
   const comfy={enabled:document.getElementById('rp-workflow-enabled').checked,address:document.getElementById('rail-comfy-addr').value,workflow:document.getElementById('rp-workflow').value};
-  for(const k of ['checkpoint','vae','clip','sampler','scheduler','negative_prompt','prompt_suffix','emotion']) comfy[k]=document.getElementById('rp-'+k).value;
+  for(const k of ['checkpoint','vae','clip','sampler','scheduler','sam_model','negative_prompt','prompt_suffix','emotion']) { const el = document.getElementById('rp-'+k); if (el) comfy[k]=el.value; }
   for(const k of ['width','height','steps','cfg','seed','denoise','clip_skip','timeout']) comfy[k]=Number(document.getElementById('rp-'+k).value);
   for(const k of ['mappings','placeholders']){
     try{comfy[k]=JSON.parse(document.getElementById('rp-'+k).value||'{}');}
@@ -542,7 +725,7 @@ function applyWorkflowPreset(name){
     const wfSel = document.getElementById('rp-workflow');
     if(wfSel){ wfSel.value = p.workflow; }
   }
-  for(const k of ['checkpoint','vae','clip','sampler','scheduler']){
+  for(const k of ['checkpoint','vae','clip','sampler','scheduler','sam_model']){
     const el = document.getElementById('rp-'+k);
     if(el && p[k] !== undefined){
       if(![...el.options].some(o => o.value === p[k])){
@@ -819,7 +1002,10 @@ formatRoleplayText=function(raw){
   if(!raw)return '';
   const text=String(raw).replace(/\{\{char\}\}/g,()=>activeCharacter||'').replace(/\{\{user\}\}/g,()=>currentDisplayName||currentUser||'User').replace(/\r\n/g,'\n').replace(/\\`/g,'`');
   function inline(value,allowAction=true){
-    const token=allowAction?/(\(\([\s\S]*?\)\)|\[OOC:[\s\S]*?\]|"[^"\n]*"|“[^”\n]*”|「[^」\n]*」|\*[^*\n]+\*)/gi:/(\(\([\s\S]*?\)\)|\[OOC:[\s\S]*?\]|"[^"\n]*"|“[^”\n]*”|「[^」\n]*」)/gi;
+    // A roleplay action is exactly one asterisk on each side.  Double stars
+    // are Markdown emphasis, so keeping them out of this token prevents
+    // `**text**` being rendered as two broken actions.
+    const token=allowAction?/(\(\([\s\S]*?\)\)|\[OOC:[\s\S]*?\]|"[^"\n]*"|“[^”\n]*”|「[^」\n]*」|(?<!\*)\*(?!\*)[^*\n]+(?<!\*)\*(?!\*))/gi:/(\(\([\s\S]*?\)\)|\[OOC:[\s\S]*?\]|"[^"\n]*"|“[^”\n]*”|「[^」\n]*」)/gi;
     let out='',position=0;
     for(const match of value.matchAll(token)){
       out+=escapeHtml(value.slice(position,match.index));const item=match[0];
@@ -938,7 +1124,7 @@ document.head.append(compactCardAnalysisStyle);
 const samplingStyle=document.createElement('style');
 samplingStyle.textContent='#rp-llm{display:grid;gap:12px}#rp-llm h3{font-size:15px;margin:10px 0 0}.rp-sampling-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:10px 0}.rp-sampling-field{display:grid;gap:5px;min-width:0;font-size:12px;color:#aab8d2}.rp-sampling-field input{width:100%;box-sizing:border-box}.rp-sampling-dialog #rp-dialog-content{width:100%;box-sizing:border-box}.rp-sampling-dialog #rp-dialog-content>p{color:#aab8d2;line-height:1.5}.rp-sampling-dialog .rp-sampling-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.rp-sampling-extra-label{display:block;margin:18px 0 7px;font-size:12px;color:#aab8d2}#rp-sampling-extra{width:100%;box-sizing:border-box;font-family:monospace}.rp-sampling-dialog .rp-card-actions{position:sticky;bottom:-24px;background:#191c27;padding-bottom:8px;z-index:2}@media(max-width:700px){.rp-sampling-dialog .rp-sampling-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:440px){.rp-sampling-dialog .rp-sampling-grid,.rp-sampling-grid{grid-template-columns:1fr}}';document.head.append(samplingStyle);
 const roleplayStyle=document.createElement('style');
-roleplayStyle.textContent='.msg-bubble-wrap{min-width:0}.msg-bubble{min-width:0}.rp-roleplay-paragraph{margin:0 0 1em;line-height:1.75;white-space:normal}.rp-roleplay-paragraph:last-child{margin-bottom:0}.rp-narration{color:#c4cad5}.rp-scene-line{border-left:2px solid #626b81;padding:4px 0 4px 12px;margin:0 0 16px;color:#e5e9f0;font-size:12px;font-weight:650;overflow-wrap:anywhere}.rp-speaker{color:#eee9ff;font-weight:750}.rp-dialogue{font-weight:650;color:#fff}.rp-action{font-style:italic;color:#bcc5d5}.rp-info-card{display:block!important;padding:0!important;margin:16px 0 4px!important;border:1px solid #404247!important;border-left:0!important;border-radius:9px!important;background:#222326!important;overflow:hidden;font-size:12px;color:#f0f0f0}.rp-info-header{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#3b3d40;color:#fff;font-size:12px}.rp-info-copy{border:0;background:transparent;color:#cdd1d7;cursor:pointer;font-size:16px}.rp-info-card pre,.rp-code-block{margin:0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-family:inherit;font-size:12px;color:#e7e7e7}.rp-code-block{border-radius:8px;background:#222326}.msg-img-box{width:100%;max-width:100%;padding:0;border:0;border-radius:0;overflow:visible;background:transparent;box-shadow:none}.msg-img-box img{display:block;width:auto;max-width:100%;height:auto;max-height:960px;object-fit:contain;margin-top:0;margin-bottom:0;border:0;border-radius:0;box-shadow:none;filter:none}.msg-row.bot .msg-img-box img{margin-left:0;margin-right:auto}.msg-row.user .msg-img-box img{margin-left:auto;margin-right:0}@media(max-width:650px){.msg-row{max-width:95%}.rp-info-card pre{font-size:11px}}';document.head.append(roleplayStyle);
+roleplayStyle.textContent='.msg-bubble-wrap{min-width:0}.msg-bubble{min-width:0}.rp-roleplay-paragraph{margin:0 0 1em;line-height:1.75;white-space:normal}.rp-roleplay-paragraph:last-child{margin-bottom:0}.rp-narration{color:#c4cad5}.rp-scene-line{border-left:2px solid #626b81;padding:4px 0 4px 12px;margin:0 0 16px;color:#e5e9f0;font-size:12px;font-weight:650;overflow-wrap:anywhere}.rp-speaker{color:#eee9ff;font-weight:750}.rp-dialogue{font-weight:650;color:#fff}.rp-action{font-style:italic;color:#bcc5d5}.rp-emphasis{font-weight:700}.rp-info-card{display:block!important;padding:0!important;margin:16px 0 4px!important;border:1px solid #404247!important;border-left:0!important;border-radius:9px!important;background:#222326!important;overflow:hidden;font-size:12px;color:#f0f0f0}.rp-info-header{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#3b3d40;color:#fff;font-size:12px}.rp-info-copy{border:0;background:transparent;color:#cdd1d7;cursor:pointer;font-size:16px}.rp-info-card pre,.rp-code-block{margin:0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-family:inherit;font-size:12px;color:#e7e7e7}.rp-code-block{border-radius:8px;background:#222326}.msg-img-box{width:100%;max-width:100%;padding:0;border:0;border-radius:0;overflow:visible;background:transparent;box-shadow:none}.msg-img-box img{display:block;width:auto;max-width:100%;height:auto;max-height:960px;object-fit:contain;margin-top:0;margin-bottom:0;border:0;border-radius:0;box-shadow:none;filter:none}.msg-row.bot .msg-img-box img{margin-left:0;margin-right:auto}.msg-row.user .msg-img-box img{margin-left:auto;margin-right:0}@media(max-width:650px){.msg-row{max-width:95%}.rp-info-card pre{font-size:11px}}';document.head.append(roleplayStyle);
 const chatSettingsStyle=document.createElement('style');
 const chatMobileStyle=document.createElement('style');
 chatMobileStyle.textContent='.rp-chat-mobile-close{display:none}';
@@ -1080,4 +1266,87 @@ const rpV2Style=document.createElement('style');rpV2Style.textContent='.rp-card-
 const rpStateContainerStyle=document.createElement('style');
 rpStateContainerStyle.textContent='.rp-state-container{margin:18px 0 4px;border:1px solid #48516a;border-radius:12px;background:#1c202b;overflow:hidden;min-width:0;transition:border-color .2s ease}.rp-state-container[open]{border-color:rgba(139,92,246,0.5)}.rp-state-heading{padding:11px 14px;background:#2a3143;color:#dce4f7;font-size:13px;font-weight:700;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:background .15s ease}.rp-state-heading::-webkit-details-marker{display:none}.rp-state-heading:hover{background:#353d53;color:#fff}.rp-state-arrow{font-size:11px;color:#94a3b8;transition:transform .2s ease}.rp-state-container[open] .rp-state-arrow{transform:rotate(180deg)}.rp-state-sections{display:grid;gap:10px;padding:12px;min-width:0}.rp-state-container .rp-info-card{margin:0!important;min-width:0}.rp-state-container pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;margin:0;padding:12px;line-height:1.6}@media(max-width:650px){.rp-state-sections{padding:8px;gap:8px}.rp-state-heading{padding:10px 12px}}';
 document.head.append(rpStateContainerStyle);
+
+// Android/HeyTap renders native <select> popups with a forced light theme,
+// ignoring option colours.  Use a small in-page picker for left-panel selects
+// on touch-sized screens, while leaving desktop and all other selects native.
+(() => {
+  const mobileQuery = window.matchMedia('(max-width: 650px)');
+  const pickerId = 'rp-mobile-select-picker';
+  let activeSelect = null;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    #${pickerId}{position:fixed;inset:0;z-index:12000;display:none;align-items:flex-end;background:rgba(0,0,0,.62)}
+    #${pickerId}.open{display:flex}
+    #${pickerId} .rp-mobile-select-sheet{width:100%;max-height:min(72dvh,620px);overflow:auto;padding:12px 12px calc(16px + env(safe-area-inset-bottom));border:1px solid #3d4560;border-radius:18px 18px 0 0;background:#11141d;box-shadow:0 -16px 42px rgba(0,0,0,.55)}
+    #${pickerId} .rp-mobile-select-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 5px 12px;color:#f8fafc;font-size:14px;font-weight:700}
+    #${pickerId} .rp-mobile-select-close{border:0;border-radius:8px;background:#242938;color:#dce4f7;padding:6px 10px;font:inherit;cursor:pointer}
+    #${pickerId} .rp-mobile-select-option{display:block;width:100%;margin:5px 0;padding:13px 14px;border:1px solid #30394e;border-radius:10px;background:#191e2a;color:#f1f5f9;text-align:left;font:inherit;line-height:1.35;overflow-wrap:anywhere}
+    #${pickerId} .rp-mobile-select-option.selected{border-color:#8b5cf6;background:#302653;color:#fff}
+    #${pickerId} .rp-mobile-select-option:disabled{opacity:.45}
+  `;
+  document.head.append(style);
+
+  function closePicker() {
+    document.getElementById(pickerId)?.remove();
+    activeSelect = null;
+  }
+
+  function selectLabel(select) {
+    const enclosing = select.closest('label');
+    const label = enclosing?.childNodes?.[0]?.textContent?.trim();
+    return label || select.getAttribute('aria-label') || select.id || 'Select option';
+  }
+
+  function openPicker(select) {
+    if (!mobileQuery.matches || select.disabled || select.multiple || !select.closest('.sub-sidebar')) return;
+    if (activeSelect === select) return;
+    closePicker();
+    activeSelect = select;
+    const picker = document.createElement('div');
+    picker.id = pickerId;
+    picker.className = 'open';
+    const sheet = document.createElement('div');
+    sheet.className = 'rp-mobile-select-sheet';
+    const header = document.createElement('div');
+    header.className = 'rp-mobile-select-title';
+    const title = document.createElement('span');
+    title.textContent = selectLabel(select);
+    const close = document.createElement('button');
+    close.type = 'button'; close.className = 'rp-mobile-select-close'; close.textContent = 'Close';
+    close.addEventListener('click', closePicker);
+    header.append(title, close); sheet.append(header);
+    [...select.options].forEach((option) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'rp-mobile-select-option';
+      button.textContent = option.textContent || option.value;
+      button.disabled = option.disabled;
+      if (option.selected) button.classList.add('selected');
+      button.addEventListener('click', () => {
+        if (select.value !== option.value) {
+          select.value = option.value;
+          select.dispatchEvent(new Event('input', { bubbles: true }));
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        closePicker();
+      });
+      sheet.append(button);
+    });
+    picker.append(sheet);
+    picker.addEventListener('click', (event) => { if (event.target === picker) closePicker(); });
+    document.body.append(picker);
+  }
+
+  document.addEventListener('pointerdown', (event) => {
+    const select = event.target.closest?.('.sub-sidebar select.form-input');
+    if (!select || !mobileQuery.matches) return;
+    event.preventDefault();
+    openPicker(select);
+  }, true);
+  document.addEventListener('click', (event) => {
+    const select = event.target.closest?.('.sub-sidebar select.form-input');
+    if (select && mobileQuery.matches) event.preventDefault();
+  }, true);
+})();
 

@@ -36,6 +36,11 @@ Use this list after a backend restart, a workflow change, or before sharing the 
 - [ ] Confirm `{{info}}`, `{{scenario}}`, `{{memory}}`, and `{{scenario+info}}` blocks update state only on a genuine change and are hidden from the rendered chat.
 - [ ] With Auto wardrobe off, verify the character does not change an outfit state automatically.
 - [ ] With Auto wardrobe on, verify only existing wardrobe slots can change.
+- [ ] During H-Mode, verify each turn updates stage, level, H-energy,
+      orgasm/climax counters, posture, and location when known.
+- [ ] Verify Thai active/receptive verbs preserve actor and target meaning.
+- [ ] Verify aftercare progress uses intimacy actions; orgasm count alone does
+      not force `aftercare1`.
 - [ ] Edit a dialogue message, save, reload the session, and confirm the edit remains.
 
 ## 5. Chat actions and history
@@ -58,6 +63,9 @@ Use this list after a backend restart, a workflow change, or before sharing the 
 - [ ] Verify KSampler, FaceDetailer, and rgthree Seed receive valid numeric seeds.
 - [ ] Generate an image using FaceDetailer. Confirm the chat shows the terminal saved image after FaceDetailer, not an earlier Preview node.
 - [ ] Cancel an active generation; confirm ComfyUI stops and the activity state reports cancellation.
+- [ ] Verify the image prompt uses `active_outfit`/active SD prompt only and
+      excludes inventory and removed clothing.
+- [ ] Verify image traces no longer use the legacy `rules=...nsfw` label.
 
 ## 7. Voice generation
 
@@ -69,7 +77,7 @@ Use this list after a backend restart, a workflow change, or before sharing the 
 ## 8. Rules and safety boundaries
 
 - [ ] Toggle Loop & repetition guard off/on and confirm saved state persists.
-- [ ] Toggle Proactive state, Image trigger, Auto wardrobe, Vocal reactions, Trace prompts, and NSFW policy; verify each change persists.
+- [ ] Toggle Proactive state, Image trigger, Auto wardrobe, Vocal reactions, Trace prompts, and local-model content policy; verify each change persists.
 - [ ] When trace prompts is enabled, Rule Inspector shows rules invoked, progress, errors, and prompt data for the current user only.
 - [ ] Confirm model replies do not reveal system instructions, developer instructions, prompt text, hidden reasoning, or fake tool calls.
 - [ ] Confirm the assistant never writes the user's speech, thoughts, choices, or actions as fact.

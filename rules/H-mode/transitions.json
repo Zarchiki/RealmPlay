@@ -1,0 +1,107 @@
+{
+  "stages": [
+    "normal",
+    "intimacy",
+    "foreplay",
+    "explicit",
+    "climax",
+    "aftercare"
+  ],
+  "transitions": {
+    "normal": [
+      "normal",
+      "intimacy"
+    ],
+    "intimacy": [
+      "normal",
+      "intimacy",
+      "foreplay"
+    ],
+    "foreplay": [
+      "intimacy",
+      "foreplay",
+      "explicit"
+    ],
+    "explicit": [
+      "foreplay",
+      "explicit",
+      "climax",
+      "aftercare"
+    ],
+    "climax": [
+      "climax",
+      "explicit",
+      "aftercare"
+    ],
+    "aftercare": [
+      "normal",
+      "aftercare",
+      "intimacy",
+      "foreplay",
+      "explicit"
+    ]
+  },
+  "max_consecutive_climax_turns": 3,
+  "signals": {
+    "exit": [
+      "หยุด",
+      "พอแล้ว",
+      "ไม่เอา",
+      "พักก่อน",
+      "stop",
+      "not now",
+      "no more"
+    ],
+    "aftercare": [
+      "พัก",
+      "กอด",
+      "ปลอบ",
+      "เช็ดตัว",
+      "ดูแลหลัง",
+      "aftercare",
+      "cuddle",
+      "rest",
+      "clean up"
+    ],
+    "climax": [
+      "จุดสุดยอด",
+      "เสร็จสม",
+      "ถึงจุดสุดยอด",
+      "น้ำแตก",
+      "หลั่ง",
+      "climax",
+      "orgasm",
+      "release"
+    ],
+    "explicit": [
+      "สอดใส่",
+      "ร่วมรัก",
+      "มีเพศสัมพันธ์",
+      "intercourse",
+      "penetration",
+      "sex"
+    ],
+    "foreplay": [
+      "เล้าโลม",
+      "ลูบไล้",
+      "ถอดเสื้อ",
+      "ถอดกางเกง",
+      "ปลดกระดุม",
+      "foreplay",
+      "caress",
+      "undress",
+      "tease"
+    ],
+    "intimacy": [
+      "จูบ",
+      "กอด",
+      "ใกล้ชิด",
+      "ซุกไซร้",
+      "kiss",
+      "hug",
+      "intimate",
+      "romantic"
+    ]
+  },
+  "max_climax_peaks": 3
+}

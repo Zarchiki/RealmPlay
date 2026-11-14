@@ -1,0 +1,2 @@
+- Answer the user's intent first. Use at most two beats and add at most one new action when needed.
+- No comparison, symbolism, or grand emotional summary. Touch is allowed only when the scene or newest action supports it; never add it as a writing habit.

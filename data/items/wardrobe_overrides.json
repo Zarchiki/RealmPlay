@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "description": "Optional per-item overrides. Key format: wardrobe:<slot>:<lowercase-slug-of-name>. Example: {\"wardrobe:outer:oversized-teddy-coat-in-a-neutral-tone\": {\"price\": 320, \"rarity\": \"Rare\", \"effects\": {\"affection\": 10}}}",
+  "overrides": {}
+}

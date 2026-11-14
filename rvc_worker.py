@@ -26,23 +26,37 @@ if os.name == "nt":
     import ctypes
     ctypes.windll.kernel32.SetErrorMode(0x0001 | 0x0002)
 
-# --- MONKEYPATCH FOR PYTHON 3.11 + FAIRSEQ ---
+# --- MONKEYPATCH FOR PYTHON 3.11/3.13 + FAIRSEQ ---
 import dataclasses
-_original_field = dataclasses.field
-def _patched_field(*args, **kwargs):
-    if 'default' in kwargs and hasattr(kwargs['default'], '__dataclass_fields__'):
-        cls = type(kwargs['default'])
-        if cls.__hash__ is None:
-            cls.__hash__ = object.__hash__
-    return _original_field(*args, **kwargs)
-dataclasses.field = _patched_field
-# ---------------------------------------------
+_original_get_field = dataclasses._get_field
+def _patched_get_field(cls, a_name, a_type, kw_only):
+    try:
+        return _original_get_field(cls, a_name, a_type, kw_only)
+    except ValueError as e:
+        if 'mutable default' in str(e):
+            val = getattr(cls, a_name)
+            field_obj = dataclasses.field(default_factory=lambda v=val: v)
+            setattr(cls, a_name, field_obj)
+            f = _original_get_field(cls, a_name, a_type, kw_only)
+            f.default = val
+            return f
+        raise
+dataclasses._get_field = _patched_get_field
+# -------------------------------------------------
+
+import torch
+# PyTorch 2.6+ defaults weights_only=True which breaks loading fairseq checkpoint files (hubert_base.pt).
+_orig_torch_load = torch.load
+def _safe_torch_load(*load_args, **load_kwargs):
+    if "weights_only" not in load_kwargs:
+        load_kwargs["weights_only"] = False
+    return _orig_torch_load(*load_args, **load_kwargs)
+torch.load = _safe_torch_load
 
 from rvc_python.infer import RVCInference
 import rvc_python.infer as inference_module
-import torch
 faulthandler.enable()
-dataclasses.field = _original_field
+dataclasses._get_field = _original_get_field
 
 # Keep mutable RVC configuration and assets in this app, not Oobabooga's env.
 runtime = Path(__file__).resolve().parent / "rvc_runtime"

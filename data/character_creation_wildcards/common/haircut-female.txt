@@ -1,0 +1,28 @@
+Lob\(hairstyle\), (bob cut), __hair-length__
+Shaggy haircut, __hair-length__ 
+Layered haircut, __hair-length__
+Blunt haircut, __hair-length__ 
+Asymmetrical haircut, __hair-length__
+Side-swept bangs, __hair-length__
+Wispy bangs, __hair-length__
+Curtain bangs, __hair-length__
+French bob\(hairstyle\), __hair-length__
+A-line cut\(hairstyle\), __hair-length__
+Feathered cut\(hairstyle\), __hair-length__
+Long layers\(hairstyle\), __hair-length__
+Choppy layers\(hairstyle\), __hair-length__
+Beachy waves\(hairstyle\), __hair-length__
+Curly hair, __hair-length__
+Wavy hair, __hair-length__
+Straight hair, __hair-length__
+single braid, __hair-length__
+twin braid, __hair-length__
+Ponytail, __hair-length__
+Side braid, __hair-length__
+Fishtail braid, __hair-length__
+Bob hairstyle, short hair
+Pixie cut \(hairstyle\), short hair
+Top knot \(hairstyle\)
+Half-up\(hairstyle\)
+half-down\(hairstyle\)
+Updo\(hairstyle\)

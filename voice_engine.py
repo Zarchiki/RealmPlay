@@ -117,9 +117,9 @@ async def generate_edge_tts(text: str, voice: str = "th-TH-PremwadeeNeural", rat
         "--voice", voice,
     ]
     if rate and rate != "+0%":
-        cmd.extend(["--rate", rate])
+        cmd.append(f"--rate={rate}")
     if pitch_str and pitch_str != "+0Hz":
-        cmd.extend(["--pitch", pitch_str])
+        cmd.append(f"--pitch={pitch_str}")
     cmd.extend(["--write-media", output_path])
     proc = await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     try:

@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "description": "Default economy rules for every item imported automatically from data/wardrobe_catalog.json. Add a matching entry to wardrobe_overrides.json only when one item needs an exception.",
+  "default": {
+    "price": 140,
+    "rarity": "Common",
+    "icon": "👗",
+    "gift_affection": 3
+  },
+  "slots": {
+    "outer": {
+      "price": 180,
+      "icon": "🧥"
+    },
+    "outer_outfit": {
+      "price": 260,
+      "icon": "🧥"
+    },
+    "top": {
+      "price": 140,
+      "icon": "👚"
+    },
+    "top_outfit": {
+      "price": 190,
+      "icon": "👗"
+    },
+    "top_inner": {
+      "price": 110,
+      "icon": "👙"
+    },
+    "bra": {
+      "price": 90,
+      "icon": "👙"
+    },
+    "bottom": {
+      "price": 140,
+      "icon": "👖"
+    },
+    "bottom_inner": {
+      "price": 90,
+      "icon": "🩲"
+    },
+    "panties": {
+      "price": 90,
+      "icon": "🩲"
+    },
+    "shoes": {
+      "price": 160,
+      "icon": "👞"
+    },
+    "neck_acc": {
+      "price": 170,
+      "icon": "📿"
+    },
+    "ear_acc": {
+      "price": 130,
+      "icon": "✨"
+    },
+    "hand_acc": {
+      "price": 120,
+      "icon": "🧤"
+    },
+    "head_acc": {
+      "price": 120,
+      "icon": "🎀"
+    },
+    "preset": {
+      "price": 450,
+      "icon": "👑"
+    },
+    "socks": {
+      "price": 90,
+      "icon": "🧦"
+    },
+    "head": {
+      "price": 150,
+      "icon": "👒"
+    },
+    "neck": {
+      "price": 140,
+      "icon": "📿"
+    },
+    "hands": {
+      "price": 120,
+      "icon": "🧤"
+    },
+    "leg_acc": {
+      "price": 110,
+      "icon": "🎗️"
+    },
+    "accessories": {
+      "price": 130,
+      "icon": "💍"
+    }
+  }
+}

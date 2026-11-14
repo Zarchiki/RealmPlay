@@ -59,7 +59,9 @@ def register_user(username: str, password: str, display_name: Optional[str] = No
     if username in auth_data:
         return {"ok": False, "error": "Username already exists (ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว)"}
 
-    name_to_use = display_name.strip() if display_name and display_name.strip() else username
+    name_to_use = display_name.strip() if display_name and display_name.strip() else ""
+    if name_to_use and not any(c.isalnum() or "\u0E00" <= c <= "\u0E7F" for c in name_to_use):
+        name_to_use = ""
     auth_data[username] = {
         "password": hash_password(password),
         "created_at": time.time(),
@@ -95,15 +97,12 @@ def authenticate_user(username: str, password: str) -> Dict[str, Any]:
     if not user_info or not verify_password(password, user_info["password"]):
         return {"ok": False, "error": "Invalid username or password (ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง)"}
 
-    # One account owns one active browser session.  A new login deliberately
-    # invalidates old PC/mobile sessions so concurrent edits cannot overwrite
-    # each other silently.
+    # Keep each signed-in device valid.  The server stores roleplay state per
+    # account, so PC and mobile must be able to access the same account state.
     token = secrets.token_urlsafe(32)
     with _sessions_lock:
         with open(SESSIONS_FILE, "r", encoding="utf-8") as f:
             sessions = json.load(f)
-        revoked = sum(1 for session in sessions.values() if session.get("username") == username)
-        sessions = {key: session for key, session in sessions.items() if session.get("username") != username}
         sessions[token] = {
             "username": username,
             "created_at": time.time(),
@@ -112,9 +111,10 @@ def authenticate_user(username: str, password: str) -> Dict[str, Any]:
         with open(SESSIONS_FILE, "w", encoding="utf-8") as f:
             json.dump(sessions, f, indent=2, ensure_ascii=False)
 
-    display_name = user_info.get("display_name") or username
+    raw_disp = (user_info.get("display_name") or "").strip()
+    display_name = raw_disp if any(c.isalnum() or "\u0E00" <= c <= "\u0E7F" for c in raw_disp) else ""
     return {"ok": True, "token": token, "username": username, "display_name": display_name,
-            "previous_session_revoked": bool(revoked)}
+            "previous_session_revoked": False}
 
 def validate_token(token: str) -> Optional[str]:
     """Validates session token and returns username if valid."""
@@ -146,9 +146,9 @@ def revoke_token(token: str) -> None:
                 json.dump(sessions, f, indent=2, ensure_ascii=False)
 
 def get_user_display_name(username: str) -> str:
-    """Returns character-facing display name of user, defaulting to username."""
+    """Returns character-facing display name of user, empty if not specified."""
     prof = get_user_profile(username)
-    return prof.get("display_name") or username
+    return prof.get("display_name", "").strip()
 
 def get_user_profile(username: str) -> Dict[str, Any]:
     """Returns user profile dictionary (display_name, persona, bio)."""
@@ -157,7 +157,12 @@ def get_user_profile(username: str) -> Dict[str, Any]:
         with open(AUTH_FILE, "r", encoding="utf-8") as f:
             auth_data = json.load(f)
         info = auth_data.get(username, {})
-        display_name = info.get("display_name") or username
+        raw_disp = (info.get("display_name") or "").strip()
+        # When user does not specify a name, leave it blank (do not substitute username/profile name)
+        if not raw_disp or not any(c.isalnum() or "\u0E00" <= c <= "\u0E7F" for c in raw_disp):
+            display_name = ""
+        else:
+            display_name = raw_disp
         persona = info.get("persona") or ""
         return {
             "username": username,
@@ -165,7 +170,7 @@ def get_user_profile(username: str) -> Dict[str, Any]:
             "persona": persona
         }
     except Exception:
-        return {"username": username, "display_name": username, "persona": ""}
+        return {"username": username, "display_name": "", "persona": ""}
 
 def update_user_profile(username: str, display_name: Optional[str] = None, persona: Optional[str] = None) -> bool:
     """Updates user profile (display_name and character-facing user persona/bio)."""
@@ -175,7 +180,10 @@ def update_user_profile(username: str, display_name: Optional[str] = None, perso
             auth_data = json.load(f)
         if username in auth_data:
             if display_name is not None:
-                auth_data[username]["display_name"] = display_name.strip() or username
+                cleaned_disp = display_name.strip()
+                if not any(c.isalnum() or "\u0E00" <= c <= "\u0E7F" for c in cleaned_disp):
+                    cleaned_disp = ""
+                auth_data[username]["display_name"] = cleaned_disp
             if persona is not None:
                 auth_data[username]["persona"] = persona.strip()
             with open(AUTH_FILE, "w", encoding="utf-8") as f:

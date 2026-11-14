@@ -72,3 +72,9 @@ test samples.txt
 test_s.py
 test_*.py
 tests/
+Roadmap/
+output/
+tmp/
+*.bak
+*.bak_*
+

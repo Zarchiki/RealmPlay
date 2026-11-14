@@ -1,0 +1,10 @@
+[
+  {"id":"item_sweet_candy","name":"ลูกอมรสหวาน","type":"consumable","price":20,"rarity":"Common","icon":"🍬","desc":"ลูกอมรสผลไม้หอมหวาน เพิ่มความสดชื่นและความผูกพันเล็กน้อย"},
+  {"id":"item_hot_coffee","name":"กาแฟลาเต้อุ่น","type":"consumable","price":50,"rarity":"Common","icon":"☕","desc":"กาแฟหอมกรุ่น ช่วยให้ตื่นตัวและผ่อนคลาย"},
+  {"id":"item_flower_bouquet","name":"ช่อดอกไม้สด","type":"gift","price":120,"rarity":"Uncommon","icon":"💐","desc":"ดอกไม้สดสวยงาม สื่อถึงความรู้สึกดีและความประทับใจ"},
+  {"id":"item_music_box","name":"กล่องดนตรีโบราณ","type":"special","price":300,"rarity":"Rare","icon":"🎵","desc":"กล่องดนตรีไขลาน บรรเลงบทเพลงแสนอบอุ่นในค่ำคืน"},
+  {"id":"item_silk_ribbon","name":"ริบบิ้นผ้าไหมชั้นดี","type":"accessory","price":250,"rarity":"Rare","icon":"🎀","desc":"ริบบิ้นผ้าไหมเนื้อเนียนสวยงาม เหมาะสำหรับมอบเป็นของขวัญประดับกาย"},
+  {"id":"item_scented_candle","name":"เทียนหอมอโรมาผ่อนคลาย","type":"special","price":180,"rarity":"Uncommon","icon":"🕯️","desc":"กระจายกลิ่นหอมชวนเคลิบเคลิ้ม ช่วยสร้างบรรยากาศโรแมนติกเป็นกันเอง"},
+  {"id":"item_starlight_pendant","name":"จี้ไข่มุกประกายดาว","type":"special","price":800,"rarity":"Super Rare","icon":"✨","desc":"เครื่องประดับล้ำค่า ส่องแสงเรืองรองอย่างน่าหลงใหลเมื่อต้องแสงไฟ"},
+  {"id":"item_love_letter","name":"จดหมายสารภาพความในใจ","type":"gift","price":150,"rarity":"Uncommon","icon":"💌","desc":"จดหมายที่เขียนความรู้สึกอย่างจริงใจ"}
+]

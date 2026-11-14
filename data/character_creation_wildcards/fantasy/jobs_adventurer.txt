@@ -1,0 +1,19 @@
+# Adventurers, Mercenaries & Combatants
+treasure hunter, patched leather coat, rope coil clipped to belt, belt pouches
+mercenary, dented metal breastplate, leather bracers
+ranger, moss-green hood folded behind neck, leather vest, quiver strapped to back
+knight, articulated plate armor, cloth tabard, sword in belt scabbard
+scout, short canvas jacket, wrapped forearms, compact belt pack
+monster hunter, reinforced leather coat, metal trophy medallions
+sailor, striped linen shirt, knotted waist sash, rope belt
+duelist, fitted doublet, embroidered cuffs, rapier in belt scabbard
+paladin, ornate gilded breastplate, white silk sash, holy warhammer on back
+assassin, sleek dark leather tunic, hidden wrist blade, shadowy cowl
+berserker barbarian, fur-lined pauldrons, tribal war paints, leather harness
+spellblade, lightweight enchanted chainmail, glowing runic rapier, silk mantle
+beast master, reinforced arm guards, leather pouch of beast treats, whistling pendant
+dungeon delver, utility tool vest, iron pitons, glowing crystal torch
+bounty hunter, dark leather duster, heavy buckled boots, coiled chain bola
+royal vanguard, polished mirrored cuirass, crimson cape, crest insignia
+skyship privateer, brass-buttoned coat, leather flight harness, brass goggles on forehead
+dragon knight, dragonscale-adorned armor, lance scabbard, winglet shoulder guards
