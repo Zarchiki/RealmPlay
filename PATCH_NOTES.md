@@ -1,5 +1,19 @@
 # Patch Notes
 
+## 2026-11-14 — Align ComfyUI Checkpoint and Proactive Max Consecutive
+
+### What changed
+- **Configuration Default Checkpoint (`config.example.json`):**
+  - Updated default `comfy.checkpoint` from `catpony_animaV10_fp16.safetensors` to `sgnNijiXL_v10.safetensors` to match bundled `RealmPlayADV_Default.json` workflow node 46.
+- **Proactive Validation Alignment:**
+  - Ensured proactive configuration defaults align with backend validation bounds (`max_consecutive` between 1 and 2).
+
+### Verification
+- Verified `/api/configuration` returns `sgnNijiXL_v10.safetensors`.
+- Verified saving settings passes HTTP 200 without `422 Unprocessable Content`.
+
+
+
 ## 2026-11-14 — Fix Hugging Face Model Fetching URL for Vision mmproj
 
 ### What changed

@@ -131,7 +131,7 @@
         "27.model_name"
       ]
     },
-    "checkpoint": "catpony_animaV10_fp16.safetensors",
+    "checkpoint": "sgnNijiXL_v10.safetensors",
     "vae": "qwenImageVAE.safetensors",
     "emotion": "",
     "seed": -1,
