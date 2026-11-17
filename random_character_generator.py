@@ -880,7 +880,7 @@ BEHAVIORAL_ARCHETYPES = (
 )
 _LAST_BEHAVIOR_INDEX: Optional[int] = None
 AGE_RANGES = (
-    (13, 19),
+    (18, 19),
     (20, 24),
     (25, 29),
     (30, 35),
@@ -914,7 +914,7 @@ def _behavior_profile_text(behavior: Dict[str, Any], age: Optional[int] = None) 
     pacing = value("pacing", "lets closeness develop at a pace that feels mutual")
     dialogue = value("dialogue_behavior", "becomes more candid as trust grows")
 
-    if age is not None and int(age) < 13:
+    if age is not None and int(age) < 18:
         return " ".join(filter(None, (
             sentence(f"Romantically, she is {orientation}"),
             sentence(f"Her courtship style centers on {courtship}, and she shows interest by {signals}"),
@@ -1134,7 +1134,7 @@ def sample_rpg_female_wildcard_matrix(
     quality_str = visual_quality[0] if visual_quality else "masterpiece, high quality, highly detailed, sharp focus"
     behavior_seed = _behavioral_seed()
     if str(mode or '').lower() == 'highschool' and specific_age is None:
-        age_min, age_max, age = 13, 50, random.randint(13, 50)
+        age_min, age_max, age = 18, 50, random.randint(18, 50)
     else:
         age_min, age_max, age = _sample_age(specific_age)
     sampled_ethnicity = ethnicity if mode_str in ("highschool", "normal") else None
@@ -1217,7 +1217,7 @@ The character's sexuality must be individual and behaviorally visible, never a g
 - Starting Attire: {matrix['outfits']['outer']['prompt']}, {matrix['outfits']['top']['prompt']}, {matrix['outfits']['bottom']['prompt']}
 - Opening Location: {matrix['location']}
 - Character Mode: {matrix.get('mode_label', matrix.get('mode', 'Fantasy'))}
-- Required age range: {matrix.get('age_range', '13-50')}; use this exact age: {matrix.get('age', 13)} years old.
+- Required age range: {matrix.get('age_range', '18-50')}; use this exact age: {matrix.get('age', 18)} years old.
 - Required identity seed: {json.dumps(matrix.get('identity_seed') or {}, ensure_ascii=False)}
 - Required behavioral seed: {json.dumps(matrix.get('behavior_seed') or {}, ensure_ascii=False)}
 
@@ -1228,14 +1228,14 @@ Respond with a strictly valid JSON object (and ONLY JSON, no conversational mark
 {{
   "name": "Only character full name with given name and optional surname separated by a space (e.g. 'Jennifer Lopez' or 'Aeloria Silverwhisper'), strictly NO titles, epithets, honorifics, or commas (e.g. do NOT write 'the Wandering Arcanist')",
   "gender": "Female",
-  "age": "Use the required exact age above, formatted as e.g. '13 years old'.",
+  "age": "Use the required exact age above, formatted as e.g. '18 years old'.",
   "status": "Marital or relationship status (e.g. 'Single', 'In a relationship', 'Married', 'Divorced')",
   "personality": "Detailed personality traits, core values, psychological strengths, vulnerabilities, behavioral quirks, and mannerisms",
   "appearance": "Rich narrative physical description: face, expressions, hair color and style, eyes, body proportions, posture, skin texture, and aesthetic details",
   "role_goals": "Social standing, vocation, affiliations, and compelling personal ambitions or quests (e.g. 'Senior Monster Hunter, seeking legendary beasts')",
   "baseline_relationship": "Initial dynamic with {{{{user}}}} (e.g. adventuring companion bound by contract, survivor rescued from ruins, rival turned reluctant ally)",
   "background": "In-depth backstory, formative life events, training, and past history leading up to the current setting. MUST be strictly coherent with the character mode ({matrix.get('mode_label', matrix.get('mode', 'Fantasy'))}), role/job ({matrix['job']}), and opening location ({matrix['location']}). Concrete and specific rather than generic.",
-  "sex_preference": "A detailed, character-specific sexual preferences profile. Include her sexual orientation and preferred genders; preferred partners and relationship styles; sexual desires, turn-ons, kinks, roles, and favored dynamics; whether she is shy, teasing, direct, dominant, submissive, switch, romantic, casual, or slow-burn; and how these preferences appear naturally in her dialogue and behavior. Make the profile distinctive and consistent with her personality rather than a generic list. Example result styles: 'Bisexual and drawn to confident partners of any gender; a playful switch who enjoys teasing, praise, roleplay, and slow anticipation, but only becomes openly passionate after emotional trust forms.'; 'Lesbian and strongly monogamous; naturally dominant, protective, and direct, with preferences for consensual power exchange, obedience, affectionate possessiveness, and generous aftercare.'; 'Heterosexual and romance-oriented; shy about initiating, submissive once secure, and especially attracted to patience, verbal reassurance, gentle restraint, and a partner who takes the lead.' Use these only as quality and specificity references; create an original combination for every character. If the character is under 13, omit sexual material and provide only age-appropriate romantic preferences.",
+  "sex_preference": "A detailed, character-specific sexual preferences profile. Include her sexual orientation and preferred genders; preferred partners and relationship styles; sexual desires, turn-ons, kinks, roles, and favored dynamics; whether she is shy, teasing, direct, dominant, submissive, switch, romantic, casual, or slow-burn; and how these preferences appear naturally in her dialogue and behavior. Make the profile distinctive and consistent with her personality rather than a generic list. Example result styles: 'Bisexual and drawn to confident partners of any gender; a playful switch who enjoys teasing, praise, roleplay, and slow anticipation, but only becomes openly passionate after emotional trust forms.'; 'Lesbian and strongly monogamous; naturally dominant, protective, and direct, with preferences for consensual power exchange, obedience, affectionate possessiveness, and generous aftercare.'; 'Heterosexual and romance-oriented; shy about initiating, submissive once secure, and especially attracted to patience, verbal reassurance, gentle restraint, and a partner who takes the lead.' Use these only as quality and specificity references; create an original combination for every character. If the character is under 18, omit sexual material and provide only age-appropriate romantic preferences.",
   "intimacy_behavior": {{
     "orientation": "Specific sexual orientation and attraction pattern",
     "courtship_style": "Observable way she flirts, tests interest, and builds trust",
@@ -1284,7 +1284,7 @@ Output strictly valid raw JSON."""
         contemporary = str(matrix.get("mode") or "").lower() in ("normal", "highschool")
         data = {
             "name": identity_seed["name"],
-            "age": f"{matrix.get('age', 13)} years old",
+            "age": f"{matrix.get('age', 18)} years old",
             "personality": identity_seed["personality_anchor"],
             "appearance": f"A {matrix['race']} girl with {matrix['hair']}, {matrix['eyes']}, and {matrix['body']}; {identity_seed['appearance_anchor']}." if contemporary else f"A {matrix['race']} woman with {matrix['hair']}, {matrix['eyes']}, and {matrix['body']}; {identity_seed['appearance_anchor']}.",
             "status_role_goals": f"Works as {matrix['job']} and is determined to define her future on her own terms.",
@@ -1309,7 +1309,7 @@ Output strictly valid raw JSON."""
         data["sex_preference"] = _behavior_profile_text(data["intimacy_behavior"], matrix.get("age"))
     # The sampled age is authoritative so the LLM cannot drift outside the
     # range or return the same default age for every character.
-    data["age"] = f"{matrix.get('age', 13)} years old"
+    data["age"] = f"{matrix.get('age', 18)} years old"
     # Identity anchors are authoritative to prevent malformed or generic LLM
     # results from losing name and character-defining details.
     data["name"] = identity_seed["name"]
